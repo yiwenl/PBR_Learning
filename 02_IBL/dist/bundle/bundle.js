@@ -4481,6 +4481,8 @@ var ViewBall = require("./ViewBall");
 
 function SceneApp() {
 	gl = GL.gl;
+	console.log( gl.getExtension("EXT_shader_texture_lod") );
+	console.log( gl.getExtension("GL_EXT_shader_texture_lod") );
 	this.count = 0;
 	bongiovi.Scene.call(this);
 	this.sceneRotation.lock(true);
@@ -4494,7 +4496,12 @@ var p = SceneApp.prototype = new bongiovi.Scene();
 p._initTextures = function() {
 	console.log('Init Textures');
 	var faces = [images.posx, images.negx, images.posy, images.negy, images.posz, images.negz];
-	this.cubeTexture = new bongiovi.GLCubeTexture(faces);
+	var o = {
+		magFilter:gl.LINEAR_MIPMAP_NEAREST,
+		minFilter:gl.LINEAR_MIPMAP_NEAREST
+	}
+	console.log(o);
+	this.cubeTexture = new bongiovi.GLCubeTexture(faces, o);
 };
 
 p._initViews = function() {
@@ -4525,7 +4532,7 @@ p.render = function() {
 			roughness = i/num;
 			pos[0] = -gap*num/2 + i*gap;
 			// console.log(roughness, metallic);
-			this._vBall.render(pos, lightPosition, roughness, metallic);
+			this._vBall.render(pos, lightPosition, roughness, metallic, this.cubeTexture);
 		}
 	}
 
@@ -4546,7 +4553,7 @@ var gl;
 
 
 function ViewBall() {
-	bongiovi.View.call(this, "#define GLSLIFY 1\n\n// ball.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\nuniform vec3 position;\nuniform vec3 lightPosition;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\n\n\n\nvoid main(void) {\n\tvec3 pos    = aVertexPosition + position;\n\tgl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\n\tvTextureCoord  = aTextureCoord;\n\tvPosition      = pos;\n\tvNormalOrg     = normalize(aVertexPosition);\n\tvNormal        = normalMatrix * vNormalOrg;\n\tvLightPosition = lightPosition;\n}", "#define GLSLIFY 1\n\n// ball.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\n\n\nuniform vec3 baseColor;\nuniform float roughness;\nuniform float metallic;\nuniform float specular;\nuniform float exposure;\nuniform float gamma;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.14159265359\n\n\n// OrenNayar diffuse\nvec3 getDiffuse( vec3 diffuseColor, float roughness4, float NoV, float NoL, float VoH )\n{\n\tfloat VoL = 2.0 * VoH - 1.0;\n\tfloat c1 = 1.0 - 0.5 * roughness4 / (roughness4 + 0.33);\n\tfloat cosri = VoL - NoV * NoL;\n\tfloat c2 = 0.45 * roughness4 / (roughness4 + 0.09) * cosri * ( cosri >= 0.0 ? min( 1.0, NoL / NoV ) : NoL );\n\treturn diffuseColor / PI * ( NoL * c1 + c2 );\n}\n\n// GGX Normal distribution\nfloat getNormalDistribution( float roughness4, float NoH )\n{\n\tfloat d = ( NoH * roughness4 - NoH ) * NoH + 1.0;\n\treturn roughness4 / ( d*d );\n}\n\n// Smith GGX geometric shadowing from \"Physically-Based Shading at Disney\"\nfloat getGeometricShadowing( float roughness4, float NoV, float NoL, float VoH, vec3 L, vec3 V )\n{\t\n\tfloat gSmithV = NoV + sqrt( NoV * (NoV - NoV * roughness4) + roughness4 );\n\tfloat gSmithL = NoL + sqrt( NoL * (NoL - NoL * roughness4) + roughness4 );\n\treturn 1.0 / ( gSmithV * gSmithL );\n}\n\n// Fresnel term\nvec3 getFresnel( vec3 specularColor, float VoH )\n{\n\tvec3 specularColorSqrt = sqrt( clamp( vec3(0.0, 0.0, 0.0), vec3(0.99, 0.99, 0.99), specularColor ) );\n\tvec3 n = ( 1.0 + specularColorSqrt ) / ( 1.0 - specularColorSqrt );\n\tvec3 g = sqrt( n * n + VoH * VoH - 1.0 );\n\treturn 0.5 * pow( (g - VoH) / (g + VoH), vec3(2.0) ) * ( 1.0 + pow( ((g+VoH)*VoH - 1.0) / ((g-VoH)*VoH + 1.0), vec3(2.0) ) );\n}\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// From \"I'm doing it wrong\"\n// http://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/\nfloat getAttenuation( vec3 lightPosition, vec3 vertexPosition, float lightRadius )\n{\n\tfloat r\t\t\t\t= lightRadius;\n\tvec3 L\t\t\t\t= lightPosition - vertexPosition;\n\tfloat dist\t\t\t= length(L);\n\tfloat d\t\t\t\t= max( dist - r, 0.0 );\n\tL\t\t\t\t\t/= dist;\n\tfloat denom\t\t\t= d / r + 1.0;\n\tfloat attenuation\t= 1.0 / (denom*denom);\n\tfloat cutoff\t\t= 0.0052;\n\tattenuation\t\t\t= (attenuation - cutoff) / (1.0 - cutoff);\n\tattenuation\t\t\t= max(attenuation, 0.0);\n\t\n\treturn attenuation;\n}\n\n// https://www.shadertoy.com/view/4ssXRX\n//note: uniformly distributed, normalized rand, [0;1[\nfloat nrand( vec2 n )\n{\n\treturn fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);\n}\nfloat random( vec2 n, float seed )\n{\n\tfloat t = fract( seed );\n\tfloat nrnd0 = nrand( n + 0.07*t );\n\tfloat nrnd1 = nrand( n + 0.11*t );\n\tfloat nrnd2 = nrand( n + 0.13*t );\n\tfloat nrnd3 = nrand( n + 0.17*t );\n\treturn (nrnd0+nrnd1+nrnd2+nrnd3) / 4.0;\n}\n\nconst vec3 lightColor = vec3(.92, .92, 1.0);\nconst float lightRadius = 400.0;\n\nvoid main(void) {\n\t// get the normal, light, position and half vector normalized\n\tvec3 N                  = normalize( vNormal );\n\tvec3 L                  = normalize( vLightPosition - vPosition );\n\tvec3 V                  = normalize( -vPosition );\n\tvec3 H\t\t\t\t\t= normalize(V + L);\n\t\n\t// get all the usefull dot products and clamp them between 0 and 1 just to be safe\n\tfloat NoL\t\t\t\t= saturate( dot( N, L ) );\n\tfloat NoV\t\t\t\t= saturate( dot( N, V ) );\n\tfloat VoH\t\t\t\t= saturate( dot( V, H ) );\n\tfloat NoH\t\t\t\t= saturate( dot( N, H ) );\n\n\tvec3 diffuseColor\t\t= baseColor - baseColor * metallic;\n\n\t// deduce the specular color from the baseColor and how metallic the material is\n\tvec3 specularColor\t\t= mix( vec3( 0.08 * specular ), baseColor, metallic );\n\n\t// compute the brdf terms\n\tfloat distribution\t\t= getNormalDistribution( roughness, NoH );\n\tvec3 fresnel\t\t\t= getFresnel( specularColor, VoH );\n\tfloat geom\t\t\t\t= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );\n\n\t// get the specular and diffuse and combine them\n\tvec3 diffuse\t\t\t= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );\n\tvec3 specular\t\t\t= NoL * ( distribution * fresnel * geom );\n\tvec3 color\t\t\t\t= lightColor * ( diffuse + specular );\n\n\t// get the light attenuation from its radius\n\tfloat attenuation\t\t= getAttenuation( vLightPosition, vPosition, lightRadius );\n\tcolor\t\t\t\t\t*= attenuation;\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t\t= Uncharted2Tonemap( color * exposure );\n\n\t// white balance\n\tconst float whiteInputLevel = 2.0;\n\tvec3 whiteScale\t\t\t= 1.0 / Uncharted2Tonemap( vec3( whiteInputLevel ) );\n\tcolor\t\t\t\t\t= color * whiteScale;\n\t\n\t// gamma correction\n\tcolor\t\t\t\t\t= pow( color, vec3( 1.0 / gamma ) );\n\n    gl_FragColor = vec4(color, 1.0);\n}");
+	bongiovi.View.call(this, "#define GLSLIFY 1\n\n// ball.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\nuniform vec3 position;\nuniform vec3 lightPosition;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\nvarying vec3 vEye;\n\n\n\nvoid main(void) {\n\tvec3 pos    = aVertexPosition + position;\n\tvec4 mvPos  = uMVMatrix * vec4(pos, 1.0);\n\tgl_Position = uPMatrix * mvPos;\n\n\tvTextureCoord  = aTextureCoord;\n\tvPosition      = pos;\n\tvNormalOrg     = normalize(aVertexPosition);\n\tvNormal        = normalMatrix * vNormalOrg;\n\tvLightPosition = lightPosition;\n\tvEye \t\t   = normalize(mvPos.rgb);\n}", "#define GLSLIFY 1\n\n// ball.frag\n#extension GL_EXT_shader_texture_lod : enable\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform samplerCube texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\nvarying vec3 vEye;\n\nuniform mat3 invertMVMatrix;\nuniform vec3 cameraPosition;\nuniform vec3 baseColor;\nuniform float roughness;\nuniform float metallic;\nuniform float specular;\nuniform float exposure;\nuniform float gamma;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.14159265359\n\nvec3 Diffuse(vec3 pAlbedo)\n\t\t{\n\t\t    return pAlbedo/PI;\n\t\t}\n\t    //-------------------------- Normal distribution functions --------------------------------------------\n\t\tfloat NormalDistribution_GGX(float a, float NdH)\n\t\t{\n\t\t    // Isotropic ggx.\n\t\t    float a2 = a*a;\n\t\t    float NdH2 = NdH * NdH;\n\n\t\t    float denominator = NdH2 * (a2 - 1.0) + 1.0;\n\t\t    denominator *= denominator;\n\t\t    denominator *= PI;\n\n\t\t    return a2 / denominator;\n\t\t}\n\n\t\t//-------------------------- Geometric shadowing -------------------------------------------\n\t\tfloat Geometric_Smith_Schlick_GGX(float a, float NdV, float NdL)\n\t\t{\n\t\t        // Smith schlick-GGX.\n\t\t    float k = a * 0.5;\n\t\t    float GV = NdV / (NdV * (1.0 - k) + k);\n\t\t    float GL = NdL / (NdL * (1.0 - k) + k);\n\n\t\t    return GV * GL;\n\t\t}\n\n\t\t//-------------------------- Fresnel ------------------------------------\n\t\tvec3 Fresnel_Schlick(vec3 specularColor, vec3 h, vec3 v)\n\t\t{\n\t\t    return (specularColor + (1.0 - specularColor) * pow((1.0 - clamp(dot(v, h), 0.0, 1.0)), 5.0));\n\t\t}\n\n\t\t//-------------------------- BRDF terms ------------------------------------\n\t\tfloat Specular_D(float a, float NdH)\n\t\t{\n\t\t\treturn NormalDistribution_GGX(a, NdH);\n\t\t}\n\n\t\tvec3 Specular_F(vec3 specularColor, vec3 h, vec3 v)\n\t\t{\n\t\t\t return Fresnel_Schlick(specularColor, h, v);\n\t\t}\n\n\t\tvec3 Specular_F_Roughness(vec3 specularColor, float a, vec3 h, vec3 v)\n\t\t{\n\t\t\treturn (specularColor + (max(vec3(1.0 - a), specularColor) - specularColor) * pow((1.0 - clamp(dot(v, h), 0.0, 1.0)), 5.0));\n\t\t}\n\n\t\tfloat Specular_G(float a, float NdV, float NdL, float NdH, float VdH, float LdV)\n\t\t{\n\t\t\treturn Geometric_Smith_Schlick_GGX(a, NdV, NdL);\n\t\t}\n\n\t\tvec3 Specular(vec3 specularColor, vec3 h, vec3 v, vec3 l, float a, float NdL, float NdV, float NdH, float VdH, float LdV)\n\t\t{\n\t\t    return ((Specular_D(a, NdH) * Specular_G(a, NdV, NdL, NdH, VdH, LdV)) * Specular_F(specularColor, v, h) ) / (4.0 * NdL * NdV + 0.0001);\n\t\t}\n\n\t\tvec3 ComputeLight(vec3 albedoColor,vec3 specularColor, vec3 normal, vec3 lightPosition, vec3 lightColor, vec3 lightDir, vec3 viewDir)\n\t\t{\n\t\t    // Compute some useful values.\n\t\t    float NdL = clamp(dot(normal, lightDir), 0.0, 1.0);\n\t\t    float NdV = clamp(dot(normal, viewDir), 0.0, 1.0);\n\t\t    vec3 h = normalize(lightDir + viewDir);\n\t\t    float NdH = clamp(dot(normal, h), 0.0, 1.0);\n\t\t    float VdH = clamp(dot(viewDir, h), 0.0, 1.0);\n\t\t    float LdV = clamp(dot(lightDir, viewDir), 0.0, 1.0);\n\t\t    float a = max(0.001, roughness * roughness);\n\n\t\t    vec3 cDiff = Diffuse(albedoColor);\n\t\t    vec3 cSpec = Specular(specularColor, h, viewDir, lightDir, a, NdL, NdV, NdH, VdH, LdV);\n\n\t\t    return lightColor * NdL * (cDiff * (1.0 - cSpec) + cSpec);\n\t\t}\n\n\t\t// Ok, this is ugly, but there is an explanation ...\n\t\t// WebGL need the extension EXT_shader_texture_lod in order to use textureCubeLod, and it's not yet implemented.\n\t\t// With textureCube the mipmap is automatically applied, and you can only add a bias.\n\t\t// To avoid that I saved each mip level in a separate cubemap.\n\t\t// If there is a less awfull way to do this I'd be happy to know !\n\t\tvec3 ComputeEnvColor(float roughness, vec3 reflectionVector)\n\t\t{\t\n\t\t\t// float r = pow(roughness * roughness, 4.0);\n\t\t\tfloat a = roughness * roughness * 6.0;\n\t\t\treturn textureCubeLodEXT(texture, reflectionVector, a).rgb;\n\t\t}\n\nvoid main(void) {\n\tvec3 normal = vNormalOrg;\n\n\tvec3 viewDir = normalize(cameraPosition - vPosition);\n\tvec3 albedoCorrected = pow(abs(baseColor.rgb), vec3(2.2));\n\n\tvec3 realAlbedo = baseColor - baseColor * metallic;\n\tvec3 realSpecularColor = mix(vec3(0.03, 0.03, 0.03), baseColor, metallic);\n\n\tvec3 vLightVector = normalize(vLightPosition);\n\tvec3 light1 = ComputeLight( realAlbedo, realSpecularColor, normal, vLightPosition, vec3(0.4, 0.42, 0.37), vLightVector, viewDir);\n\n\tvec3 reflectVector = invertMVMatrix*reflect(vEye, vNormal);\n\tvec3 envColor = ComputeEnvColor(roughness, reflectVector);\n\n\tvec3 envFresnel = Specular_F_Roughness(realSpecularColor, roughness * roughness, normal, viewDir);\n\n    // gl_FragColor = vec4(envColor, 1.0);\n    const float lightIntensity = 1.0;\n    gl_FragColor = vec4(vec3(lightIntensity) * light1 + 1.0 * envFresnel * envColor + realAlbedo * 0.01, 1.0);\n}");
 }
 
 var p = ViewBall.prototype = new bongiovi.View();
@@ -4559,10 +4566,10 @@ p._init = function() {
 	var coords = [];
 	var indices = []; 
 
-	this.mesh = bongiovi.MeshUtils.createSphere(20, 20);
+	this.mesh = bongiovi.MeshUtils.createSphere(20, 50);
 };
 
-p.render = function(pos, lightPos, roughness, metallic) {
+p.render = function(pos, lightPos, roughness, metallic, texture) {
 	this.shader.bind();
 	// this.shader.uniform("texture", "uniform1i", 0);
 	// texture.bind(0);
@@ -4570,14 +4577,18 @@ p.render = function(pos, lightPos, roughness, metallic) {
 	var exposure = 1.5;
 	var gamma    = 2.2;
 
+	this.shader.uniform("cameraPosition", "uniform3fv", GL.camera.position);
 	this.shader.uniform("lightPosition", "uniform3fv", lightPos || [0, 0, 0]);
 	this.shader.uniform("position", "uniform3fv", pos || [0, 0, 0]);
-	this.shader.uniform("baseColor", "uniform3fv", [.5, 0.5, .095]);
-	this.shader.uniform("roughness", "uniform1f", Math.pow(roughness * roughness, 4.0)  );
+	this.shader.uniform("baseColor", "uniform3fv", [1, 1, 1]);
+	// this.shader.uniform("roughness", "uniform1f", Math.pow(roughness * roughness, 4.0)  );
+	this.shader.uniform("roughness", "uniform1f", roughness);
 	this.shader.uniform("metallic", "uniform1f", metallic);
 	this.shader.uniform("specular", "uniform1f", specular);
 	this.shader.uniform("exposure", "uniform1f", exposure);
 	this.shader.uniform("gamma", "uniform1f", gamma);
+	this.shader.uniform("texture", "uniform1i", 0);
+	texture.bind(0);
 	GL.draw(this.mesh);
 };
 

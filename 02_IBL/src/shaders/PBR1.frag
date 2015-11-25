@@ -1,30 +1,60 @@
-// ball.frag
-#extension GL_EXT_shader_texture_lod : enable
-#define SHADER_NAME SIMPLE_TEXTURE
+// PBR1.frag
 
 precision highp float;
-uniform samplerCube texture;
+precision highp int;
 
-varying vec2 vTextureCoord;
-varying vec3 vNormal;
-varying vec3 vNormalOrg;
-varying vec3 vPosition;
-varying vec3 vLightPosition;
-varying vec3 vEye;
 
-uniform mat3 invertMVMatrix;
+#define MAX_DIR_LIGHTS 0
+#define MAX_POINT_LIGHTS 0
+#define MAX_SPOT_LIGHTS 0
+#define MAX_HEMI_LIGHTS 0
+#define MAX_SHADOWS 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
-uniform vec3 baseColor;
-uniform float roughness;
-uniform float metallic;
-uniform float specular;
-uniform float exposure;
-uniform float gamma;
 
-#define saturate(x) clamp(x, 0.0, 1.0)
-#define PI 3.14159265359
 
-vec3 Diffuse(vec3 pAlbedo)
+		#define PI 3.14159265359
+
+	    uniform samplerCube envMap0;
+	    uniform samplerCube envMap1;
+	    uniform samplerCube envMap2;
+	    uniform samplerCube envMap3;
+	    uniform samplerCube envMap4;
+	    uniform samplerCube envMap5;
+	    uniform vec3 baseColor;
+
+	    uniform float roughness;
+	    uniform float metallic;
+	    uniform float lightIntensity;
+	    
+	    varying vec2 vUv;
+	    varying mat3 tbn;
+	    varying vec3 vLightVector;
+	    varying vec3 vTestNormal;
+	    varying vec3 vPosition;
+
+
+	    vec3 Diffuse(vec3 pAlbedo)
 		{
 		    return pAlbedo/PI;
 		}
@@ -108,30 +138,54 @@ vec3 Diffuse(vec3 pAlbedo)
 		// To avoid that I saved each mip level in a separate cubemap.
 		// If there is a less awfull way to do this I'd be happy to know !
 		vec3 ComputeEnvColor(float roughness, vec3 reflectionVector)
-		{	
-			// float r = pow(roughness * roughness, 4.0);
+		{
 			float a = roughness * roughness * 6.0;
-			return textureCubeLodEXT(texture, reflectionVector, a).rgb;
+			if ( a < 1.0)
+			{
+				return mix(textureCube(envMap0, reflectionVector).rgb, textureCube(envMap1, reflectionVector).rgb, a);
+			}
+
+			if ( a < 2.0)
+			{
+				return mix(textureCube(envMap1, reflectionVector).rgb, textureCube(envMap2, reflectionVector).rgb, a - 1.0);
+			}
+
+			if ( a < 3.0)
+			{
+				return mix(textureCube(envMap2, reflectionVector).rgb, textureCube(envMap3, reflectionVector).rgb, a - 2.0);
+			}
+
+			if ( a < 4.0)
+			{
+				return mix(textureCube(envMap3, reflectionVector).rgb, textureCube(envMap4, reflectionVector).rgb, a - 3.0);
+			}
+
+			if ( a < 5.0)
+			{
+				return mix(textureCube(envMap4, reflectionVector).rgb, textureCube(envMap5, reflectionVector).rgb, a - 4.0);
+			}
+
+			return textureCube(envMap5, reflectionVector).rgb;
 		}
+	    
+	    void main() 
+	    {
 
-void main(void) {
-	vec3 normal = vNormalOrg;
+	        vec3 normal = vTestNormal;
 
-	vec3 viewDir = normalize(cameraPosition - vPosition);
-	vec3 albedoCorrected = pow(abs(baseColor.rgb), vec3(2.2));
+	        vec3 viewDir = normalize(cameraPosition - vPosition);
+	        vec3 albedoCorrected = pow(abs(baseColor.rgb), vec3(2.2));
 
-	vec3 realAlbedo = baseColor - baseColor * metallic;
-	vec3 realSpecularColor = mix(vec3(0.03, 0.03, 0.03), baseColor, metallic);
+	        vec3 realAlbedo = baseColor - baseColor * metallic;
+	        vec3 realSpecularColor = mix(vec3(0.03, 0.03, 0.03), baseColor, metallic);
 
-	vec3 vLightVector = normalize(vLightPosition);
-	vec3 light1 = ComputeLight( realAlbedo, realSpecularColor, normal, vLightPosition, vec3(0.4, 0.42, 0.37), vLightVector, viewDir);
+	        vec3 light1 = ComputeLight( realAlbedo, realSpecularColor, normal, vLightVector, vec3(0.4, 0.42, 0.37), vLightVector, viewDir);
 
-	vec3 reflectVector = invertMVMatrix*reflect(vEye, vNormal);
-	vec3 envColor = ComputeEnvColor(roughness, reflectVector);
+	        vec3 reflectVector = reflect(-viewDir, normal);
+    		vec3 envColor = ComputeEnvColor(roughness, reflectVector);
 
-	vec3 envFresnel = Specular_F_Roughness(realSpecularColor, roughness * roughness, normal, viewDir);
+    		vec3 envFresnel = Specular_F_Roughness(realSpecularColor, roughness * roughness, normal, viewDir);
 
-    // gl_FragColor = vec4(envColor, 1.0);
-    const float lightIntensity = 1.0;
-    gl_FragColor = vec4(vec3(lightIntensity) * light1 + 1.0 * envFresnel * envColor + realAlbedo * 0.01, 1.0);
-}
+    		gl_FragColor = vec4(vec3(lightIntensity) * light1 + 1.0 * envFresnel * envColor + realAlbedo * 0.01, 1.0);
+	    }
+	  	

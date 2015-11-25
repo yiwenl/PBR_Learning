@@ -6,6 +6,8 @@ var ViewBall = require("./ViewBall");
 
 function SceneApp() {
 	gl = GL.gl;
+	console.log( gl.getExtension("EXT_shader_texture_lod") );
+	console.log( gl.getExtension("GL_EXT_shader_texture_lod") );
 	this.count = 0;
 	bongiovi.Scene.call(this);
 	this.sceneRotation.lock(true);
@@ -19,7 +21,12 @@ var p = SceneApp.prototype = new bongiovi.Scene();
 p._initTextures = function() {
 	console.log('Init Textures');
 	var faces = [images.posx, images.negx, images.posy, images.negy, images.posz, images.negz];
-	this.cubeTexture = new bongiovi.GLCubeTexture(faces);
+	var o = {
+		magFilter:gl.LINEAR_MIPMAP_NEAREST,
+		minFilter:gl.LINEAR_MIPMAP_NEAREST
+	}
+	console.log(o);
+	this.cubeTexture = new bongiovi.GLCubeTexture(faces, o);
 };
 
 p._initViews = function() {
@@ -50,7 +57,7 @@ p.render = function() {
 			roughness = i/num;
 			pos[0] = -gap*num/2 + i*gap;
 			// console.log(roughness, metallic);
-			this._vBall.render(pos, lightPosition, roughness, metallic);
+			this._vBall.render(pos, lightPosition, roughness, metallic, this.cubeTexture);
 		}
 	}
 
