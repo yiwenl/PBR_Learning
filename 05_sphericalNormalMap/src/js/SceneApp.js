@@ -5,16 +5,10 @@ var ViewSphere = require("./ViewSphere");
 
 function SceneApp() {
 	gl = GL.gl;
-	gl.disable(gl.CULL_FACE);
 	bongiovi.Scene.call(this);
 
-	this.camera.lockRotation(false);
-	this.sceneRotation.lock(true);
-
-	this.camera.setPerspective(90*Math.PI/180, window.innerWidth/window.innerHeight, 5, 3000);
-	// this.camera.radius.value = 1;
-
 	window.addEventListener("resize", this.resize.bind(this));
+	this.resize();
 }
 
 
@@ -22,10 +16,6 @@ var p = SceneApp.prototype = new bongiovi.Scene();
 
 p._initTextures = function() {
 	console.log('Init Textures');
-	this.texture = new bongiovi.GLTexture(images.latlng);
-	this.textureMap = new bongiovi.GLTexture(images.uffizi);
-	this.textureNormal = new bongiovi.GLTexture(images.sphereNormal);
-	console.log(this.texture);
 };
 
 p._initViews = function() {
@@ -40,13 +30,16 @@ p.render = function() {
 	this._vAxis.render();
 	this._vDotPlane.render();
 
-	// this._vSphere.render(this.texture);
-	// this._vSphere.render(this.textureMap);
-	this._vSphere.render(this.textureNormal);
+
+	GL.setMatrices(this.cameraOrtho);
+	GL.rotate(this.rotationFront);
+
+	this._vSphere.render();
 };
 
 p.resize = function() {
-	GL.setSize(window.innerWidth, window.innerHeight);
+	var scale = 1.5;
+	GL.setSize(1024*scale, 512*scale);
 	this.camera.resize(GL.aspectRatio);
 };
 

@@ -7,23 +7,13 @@ var dat = require("dat-gui");
 	var SceneApp = require("./SceneApp");
 
 	App = function() {
-
-		var l = new bongiovi.SimpleImageLoader();
-		var a = ["assets/latlng.png", "assets/sphereNormal.png", "assets/uffizi.jpg"];
-		l.load(a, this, this._onImageLoaded);
-		
-	}
-
-	var p = App.prototype;
-
-	p._onImageLoaded = function(img) {
-		window.images = img;
-
 		if(document.body) this._init();
 		else {
 			window.addEventListener("load", this._init.bind(this));
 		}
-	};
+	}
+
+	var p = App.prototype;
 
 	p._init = function() {
 		this.canvas = document.createElement("canvas");
@@ -4475,16 +4465,10 @@ var ViewSphere = require("./ViewSphere");
 
 function SceneApp() {
 	gl = GL.gl;
-	gl.disable(gl.CULL_FACE);
 	bongiovi.Scene.call(this);
 
-	this.camera.lockRotation(false);
-	this.sceneRotation.lock(true);
-
-	this.camera.setPerspective(90*Math.PI/180, window.innerWidth/window.innerHeight, 5, 3000);
-	// this.camera.radius.value = 1;
-
 	window.addEventListener("resize", this.resize.bind(this));
+	this.resize();
 }
 
 
@@ -4492,10 +4476,6 @@ var p = SceneApp.prototype = new bongiovi.Scene();
 
 p._initTextures = function() {
 	console.log('Init Textures');
-	this.texture = new bongiovi.GLTexture(images.latlng);
-	this.textureMap = new bongiovi.GLTexture(images.uffizi);
-	this.textureNormal = new bongiovi.GLTexture(images.sphereNormal);
-	console.log(this.texture);
 };
 
 p._initViews = function() {
@@ -4510,13 +4490,16 @@ p.render = function() {
 	this._vAxis.render();
 	this._vDotPlane.render();
 
-	// this._vSphere.render(this.texture);
-	// this._vSphere.render(this.textureMap);
-	this._vSphere.render(this.textureNormal);
+
+	GL.setMatrices(this.cameraOrtho);
+	GL.rotate(this.rotationFront);
+
+	this._vSphere.render();
 };
 
 p.resize = function() {
-	GL.setSize(window.innerWidth, window.innerHeight);
+	var scale = 1.5;
+	GL.setSize(1024*scale, 512*scale);
 	this.camera.resize(GL.aspectRatio);
 };
 
@@ -4529,7 +4512,8 @@ var gl;
 
 
 function ViewSphere() {
-	bongiovi.View.call(this);
+	// bongiovi.View.call(this, null, bongiovi.ShaderLibs.get('simpleColorFrag'));
+	bongiovi.View.call(this, "#define GLSLIFY 1\n\n// sphereNormal.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tconst float scale = 2.0;\n\tvec3 pos = vec3(aTextureCoord-vec2(.5), 0.0) * scale;\n    gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n    vTextureCoord = aTextureCoord;\n    vNormal = normalize(aVertexPosition);\n}", "#define GLSLIFY 1\n\n// sphereNormal.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec3 vNormal;\n\nvoid main(void) {\n    gl_FragColor = vec4(vNormal * .5 + .5 , 1.0);\n}");
 }
 
 var p = ViewSphere.prototype = new bongiovi.View();
@@ -4538,13 +4522,17 @@ p.constructor = ViewSphere;
 
 p._init = function() {
 	gl = GL.gl;
-	this.mesh = bongiovi.MeshUtils.createSphere(150, 50);
+	var positions = [];
+	var coords = [];
+	var indices = []; 
+
+	this.mesh = bongiovi.MeshUtils.createSphere(100, 50);
 };
 
-p.render = function(texture) {
+p.render = function() {
 	this.shader.bind();
-	this.shader.uniform("texture", "uniform1i", 0);
-	texture.bind(0);
+	this.shader.uniform("color", "uniform3fv", [1, 1, 1]);
+	this.shader.uniform("opacity", "uniform1f", 1);
 	GL.draw(this.mesh);
 };
 
