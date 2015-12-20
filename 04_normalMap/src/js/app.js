@@ -8,7 +8,7 @@ var dat = require("dat-gui");
 	App = function() {
 
 		var l = new bongiovi.SimpleImageLoader();
-		var a = ["assets/latlng.png"];
+		var a = ["assets/latlng.png", "assets/uffizi.jpg"];
 		l.load(a, this, this._onImageLoaded);
 		
 	}

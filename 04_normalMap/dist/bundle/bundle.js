@@ -9,7 +9,7 @@ var dat = require("dat-gui");
 	App = function() {
 
 		var l = new bongiovi.SimpleImageLoader();
-		var a = ["assets/latlng.png"];
+		var a = ["assets/latlng.png", "assets/uffizi.jpg"];
 		l.load(a, this, this._onImageLoaded);
 		
 	}
@@ -4493,6 +4493,7 @@ var p = SceneApp.prototype = new bongiovi.Scene();
 p._initTextures = function() {
 	console.log('Init Textures');
 	this.texture = new bongiovi.GLTexture(images.latlng);
+	this.textureMap = new bongiovi.GLTexture(images.uffizi);
 	console.log(this.texture);
 };
 
@@ -4508,7 +4509,8 @@ p.render = function() {
 	this._vAxis.render();
 	this._vDotPlane.render();
 
-	this._vSphere.render(this.texture);
+	// this._vSphere.render(this.texture);
+	this._vSphere.render(this.textureMap);
 };
 
 p.resize = function() {
