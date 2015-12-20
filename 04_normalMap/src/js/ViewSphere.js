@@ -14,7 +14,7 @@ p.constructor = ViewSphere;
 
 p._init = function() {
 	gl = GL.gl;
-	this.mesh = bongiovi.MeshUtils.createSphere(150, 50);
+	this.mesh = bongiovi.MeshUtils.createSphere(1500, 50);
 };
 
 p.render = function(texture) {
