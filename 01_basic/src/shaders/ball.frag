@@ -19,6 +19,8 @@ uniform float specular;
 uniform float exposure;
 uniform float gamma;
 
+const vec3 lightColor = vec3(.92, .92, 1.0);
+const float lightRadius = 1500.0;
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.14159265359
 
@@ -106,11 +108,8 @@ float random( vec2 n, float seed )
 	return (nrnd0+nrnd1+nrnd2+nrnd3) / 4.0;
 }
 
-const vec3 lightColor = vec3(.92, .92, 1.0);
-const float lightRadius = 400.0;
 
-void main(void) {
-	// get the normal, light, position and half vector normalized
+vec3 getColor() {
 	vec3 N                  = normalize( vNormal );
 	vec3 L                  = normalize( vLightPosition - vPosition );
 	vec3 V                  = normalize( -vPosition );
@@ -128,6 +127,7 @@ void main(void) {
 	vec3 specularColor		= mix( vec3( 0.08 * specular ), baseColor, metallic );
 
 	// compute the brdf terms
+	// float roughness4 		= roughness * roughness/4.0
 	float distribution		= getNormalDistribution( roughness, NoH );
 	vec3 fresnel			= getFresnel( specularColor, VoH );
 	float geom				= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );
@@ -151,6 +151,15 @@ void main(void) {
 	
 	// gamma correction
 	color					= pow( color, vec3( 1.0 / gamma ) );
+
+	return color;
+}
+
+
+
+void main(void) {
+	// get the normal, light, position and half vector normalized
+	vec3 color = getColor();
 
     gl_FragColor = vec4(color, 1.0);
 }

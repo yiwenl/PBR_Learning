@@ -40,24 +40,30 @@ p.render = function() {
 	// this._vAxis.render();
 	this._vDotPlane.render();
 
-	var num = 9;
+	var num = 5;
 	var gap = 50;
 	var roughness = 0.0;
 	var metallic = 0.0;
+	var specular = 0.0;
 	var pos = [0, 0, 0];
 	var l = 100.0;
 	var r = 300.0;
 	var lightPosition = [Math.cos(this.count) * r, l, Math.sin(this.count) * r];
-	for(var j=0; j<=num; j++) {
-		metallic = j/num;
-		pos[2] = -gap*num/2 + j*gap;
-		for(var i=0; i<=num; i++) {
-			roughness = i/num;
-			pos[0] = -gap*num/2 + i*gap;
-			// console.log(roughness, metallic);
-			this._vBall.render(pos, lightPosition, roughness, metallic);
-		}
+	for(var k=0; k<=num; k++) {
+		specular = k/num;
+		pos[1] = -gap*num/2 + k*gap;
+		for(var j=0; j<=num; j++) {
+			metallic = j/num;
+			pos[2] = -gap*num/2 + j*gap;
+			for(var i=0; i<=num; i++) {
+				roughness = i/num;
+				pos[0] = -gap*num/2 + i*gap;
+				// console.log(roughness, metallic);
+				this._vBall.render(pos, lightPosition, roughness, metallic, specular);
+			}
+		}	
 	}
+	
 
 	this._vDot.render(lightPosition);
 };

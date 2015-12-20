@@ -1,61 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// app.js
-window.bongiovi = require("./libs/bongiovi.js");
-var dat = require("dat-gui");
-
-(function() {
-	var SceneApp = require("./SceneApp");
-
-	App = function() {
-
-		var loader = new bongiovi.SimpleImageLoader();
-		loader.load([
-			"assets/negx.jpg",
-			"assets/negy.jpg",
-			"assets/negz.jpg",
-			"assets/posx.jpg",
-			"assets/posy.jpg",
-			"assets/posz.jpg"
-			], this, this._onImageLoaded);
-	}
-
-	var p = App.prototype;
-
-	p._onImageLoaded = function(img) {
-		window.images = img;
-
-		if(document.body) this._init();
-		else {
-			window.addEventListener("load", this._init.bind(this));
-		}
-	};
-
-	p._init = function() {
-		this.canvas = document.createElement("canvas");
-		this.canvas.width = window.innerWidth;
-		this.canvas.height = window.innerHeight;
-		this.canvas.className = "Main-Canvas";
-		document.body.appendChild(this.canvas);
-		bongiovi.GL.init(this.canvas);
-
-		this._scene = new SceneApp();
-		bongiovi.Scheduler.addEF(this, this._loop);
-
-		// this.gui = new dat.GUI({width:300});
-	};
-
-	p._loop = function() {
-		this._scene.loop();
-	};
-
-})();
-
-
-new App();
-},{"./SceneApp":5,"./libs/bongiovi.js":8,"dat-gui":2}],2:[function(require,module,exports){
 module.exports = require('./vendor/dat.gui')
 module.exports.color = require('./vendor/dat.color')
-},{"./vendor/dat.color":3,"./vendor/dat.gui":4}],3:[function(require,module,exports){
+},{"./vendor/dat.color":2,"./vendor/dat.gui":3}],2:[function(require,module,exports){
 /**
  * dat-gui JavaScript Controller Library
  * http://code.google.com/p/dat-gui
@@ -811,7 +757,7 @@ dat.color.math = (function () {
 })(),
 dat.color.toString,
 dat.utils.common);
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /**
  * dat-gui JavaScript Controller Library
  * http://code.google.com/p/dat-gui
@@ -4472,7 +4418,7 @@ dat.dom.CenteredDiv = (function (dom, common) {
 dat.utils.common),
 dat.dom.dom,
 dat.utils.common);
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 // SceneApp.js
 
 var GL       = bongiovi.GL, gl;
@@ -4538,7 +4484,7 @@ p.resize = function() {
 };
 
 module.exports = SceneApp;
-},{"./ViewBall":6,"./ViewBox":7}],6:[function(require,module,exports){
+},{"./ViewBall":5,"./ViewBox":6}],5:[function(require,module,exports){
 // ViewBall.js
 
 var GL = bongiovi.GL;
@@ -4546,7 +4492,7 @@ var gl;
 
 
 function ViewBall() {
-	bongiovi.View.call(this, "#define GLSLIFY 1\n\n// ball.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\nuniform vec3 position;\nuniform vec3 lightPosition;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\n\n\n\nvoid main(void) {\n\tvec3 pos    = aVertexPosition + position;\n\tgl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\n\tvTextureCoord  = aTextureCoord;\n\tvPosition      = pos;\n\tvNormalOrg     = normalize(aVertexPosition);\n\tvNormal        = normalMatrix * vNormalOrg;\n\tvLightPosition = lightPosition;\n}", "#define GLSLIFY 1\n\n// ball.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\n\n\nuniform vec3 baseColor;\nuniform float roughness;\nuniform float metallic;\nuniform float specular;\nuniform float exposure;\nuniform float gamma;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.14159265359\n\n\n// OrenNayar diffuse\nvec3 getDiffuse( vec3 diffuseColor, float roughness4, float NoV, float NoL, float VoH )\n{\n\tfloat VoL = 2.0 * VoH - 1.0;\n\tfloat c1 = 1.0 - 0.5 * roughness4 / (roughness4 + 0.33);\n\tfloat cosri = VoL - NoV * NoL;\n\tfloat c2 = 0.45 * roughness4 / (roughness4 + 0.09) * cosri * ( cosri >= 0.0 ? min( 1.0, NoL / NoV ) : NoL );\n\treturn diffuseColor / PI * ( NoL * c1 + c2 );\n}\n\n// GGX Normal distribution\nfloat getNormalDistribution( float roughness4, float NoH )\n{\n\tfloat d = ( NoH * roughness4 - NoH ) * NoH + 1.0;\n\treturn roughness4 / ( d*d );\n}\n\n// Smith GGX geometric shadowing from \"Physically-Based Shading at Disney\"\nfloat getGeometricShadowing( float roughness4, float NoV, float NoL, float VoH, vec3 L, vec3 V )\n{\t\n\tfloat gSmithV = NoV + sqrt( NoV * (NoV - NoV * roughness4) + roughness4 );\n\tfloat gSmithL = NoL + sqrt( NoL * (NoL - NoL * roughness4) + roughness4 );\n\treturn 1.0 / ( gSmithV * gSmithL );\n}\n\n// Fresnel term\nvec3 getFresnel( vec3 specularColor, float VoH )\n{\n\tvec3 specularColorSqrt = sqrt( clamp( vec3(0.0, 0.0, 0.0), vec3(0.99, 0.99, 0.99), specularColor ) );\n\tvec3 n = ( 1.0 + specularColorSqrt ) / ( 1.0 - specularColorSqrt );\n\tvec3 g = sqrt( n * n + VoH * VoH - 1.0 );\n\treturn 0.5 * pow( (g - VoH) / (g + VoH), vec3(2.0) ) * ( 1.0 + pow( ((g+VoH)*VoH - 1.0) / ((g-VoH)*VoH + 1.0), vec3(2.0) ) );\n}\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// From \"I'm doing it wrong\"\n// http://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/\nfloat getAttenuation( vec3 lightPosition, vec3 vertexPosition, float lightRadius )\n{\n\tfloat r\t\t\t\t= lightRadius;\n\tvec3 L\t\t\t\t= lightPosition - vertexPosition;\n\tfloat dist\t\t\t= length(L);\n\tfloat d\t\t\t\t= max( dist - r, 0.0 );\n\tL\t\t\t\t\t/= dist;\n\tfloat denom\t\t\t= d / r + 1.0;\n\tfloat attenuation\t= 1.0 / (denom*denom);\n\tfloat cutoff\t\t= 0.0052;\n\tattenuation\t\t\t= (attenuation - cutoff) / (1.0 - cutoff);\n\tattenuation\t\t\t= max(attenuation, 0.0);\n\t\n\treturn attenuation;\n}\n\n// https://www.shadertoy.com/view/4ssXRX\n//note: uniformly distributed, normalized rand, [0;1[\nfloat nrand( vec2 n )\n{\n\treturn fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);\n}\nfloat random( vec2 n, float seed )\n{\n\tfloat t = fract( seed );\n\tfloat nrnd0 = nrand( n + 0.07*t );\n\tfloat nrnd1 = nrand( n + 0.11*t );\n\tfloat nrnd2 = nrand( n + 0.13*t );\n\tfloat nrnd3 = nrand( n + 0.17*t );\n\treturn (nrnd0+nrnd1+nrnd2+nrnd3) / 4.0;\n}\n\nconst vec3 lightColor = vec3(.92, .92, 1.0);\nconst float lightRadius = 400.0;\n\nvoid main(void) {\n\t// get the normal, light, position and half vector normalized\n\tvec3 N                  = normalize( vNormal );\n\tvec3 L                  = normalize( vLightPosition - vPosition );\n\tvec3 V                  = normalize( -vPosition );\n\tvec3 H\t\t\t\t\t= normalize(V + L);\n\t\n\t// get all the usefull dot products and clamp them between 0 and 1 just to be safe\n\tfloat NoL\t\t\t\t= saturate( dot( N, L ) );\n\tfloat NoV\t\t\t\t= saturate( dot( N, V ) );\n\tfloat VoH\t\t\t\t= saturate( dot( V, H ) );\n\tfloat NoH\t\t\t\t= saturate( dot( N, H ) );\n\n\tvec3 diffuseColor\t\t= baseColor - baseColor * metallic;\n\n\t// deduce the specular color from the baseColor and how metallic the material is\n\tvec3 specularColor\t\t= mix( vec3( 0.08 * specular ), baseColor, metallic );\n\n\t// compute the brdf terms\n\tfloat distribution\t\t= getNormalDistribution( roughness, NoH );\n\tvec3 fresnel\t\t\t= getFresnel( specularColor, VoH );\n\tfloat geom\t\t\t\t= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );\n\n\t// get the specular and diffuse and combine them\n\tvec3 diffuse\t\t\t= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );\n\tvec3 specular\t\t\t= NoL * ( distribution * fresnel * geom );\n\tvec3 color\t\t\t\t= lightColor * ( diffuse + specular );\n\n\t// get the light attenuation from its radius\n\tfloat attenuation\t\t= getAttenuation( vLightPosition, vPosition, lightRadius );\n\tcolor\t\t\t\t\t*= attenuation;\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t\t= Uncharted2Tonemap( color * exposure );\n\n\t// white balance\n\tconst float whiteInputLevel = 2.0;\n\tvec3 whiteScale\t\t\t= 1.0 / Uncharted2Tonemap( vec3( whiteInputLevel ) );\n\tcolor\t\t\t\t\t= color * whiteScale;\n\t\n\t// gamma correction\n\tcolor\t\t\t\t\t= pow( color, vec3( 1.0 / gamma ) );\n\n    gl_FragColor = vec4(color, 1.0);\n}");
+	bongiovi.View.call(this, "#define GLSLIFY 1\n// ball.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\nuniform vec3 position;\nuniform vec3 lightPosition;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\n\n\n\nvoid main(void) {\n\tvec3 pos    = aVertexPosition + position;\n\tgl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\n\tvTextureCoord  = aTextureCoord;\n\tvPosition      = pos;\n\tvNormalOrg     = normalize(aVertexPosition);\n\tvNormal        = normalMatrix * vNormalOrg;\n\tvLightPosition = lightPosition;\n}", "#define GLSLIFY 1\n// ball.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\n\n\nuniform vec3 baseColor;\nuniform float roughness;\nuniform float metallic;\nuniform float specular;\nuniform float exposure;\nuniform float gamma;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.14159265359\n\n\n// OrenNayar diffuse\nvec3 getDiffuse( vec3 diffuseColor, float roughness4, float NoV, float NoL, float VoH )\n{\n\tfloat VoL = 2.0 * VoH - 1.0;\n\tfloat c1 = 1.0 - 0.5 * roughness4 / (roughness4 + 0.33);\n\tfloat cosri = VoL - NoV * NoL;\n\tfloat c2 = 0.45 * roughness4 / (roughness4 + 0.09) * cosri * ( cosri >= 0.0 ? min( 1.0, NoL / NoV ) : NoL );\n\treturn diffuseColor / PI * ( NoL * c1 + c2 );\n}\n\n// GGX Normal distribution\nfloat getNormalDistribution( float roughness4, float NoH )\n{\n\tfloat d = ( NoH * roughness4 - NoH ) * NoH + 1.0;\n\treturn roughness4 / ( d*d );\n}\n\n// Smith GGX geometric shadowing from \"Physically-Based Shading at Disney\"\nfloat getGeometricShadowing( float roughness4, float NoV, float NoL, float VoH, vec3 L, vec3 V )\n{\t\n\tfloat gSmithV = NoV + sqrt( NoV * (NoV - NoV * roughness4) + roughness4 );\n\tfloat gSmithL = NoL + sqrt( NoL * (NoL - NoL * roughness4) + roughness4 );\n\treturn 1.0 / ( gSmithV * gSmithL );\n}\n\n// Fresnel term\nvec3 getFresnel( vec3 specularColor, float VoH )\n{\n\tvec3 specularColorSqrt = sqrt( clamp( vec3(0.0, 0.0, 0.0), vec3(0.99, 0.99, 0.99), specularColor ) );\n\tvec3 n = ( 1.0 + specularColorSqrt ) / ( 1.0 - specularColorSqrt );\n\tvec3 g = sqrt( n * n + VoH * VoH - 1.0 );\n\treturn 0.5 * pow( (g - VoH) / (g + VoH), vec3(2.0) ) * ( 1.0 + pow( ((g+VoH)*VoH - 1.0) / ((g-VoH)*VoH + 1.0), vec3(2.0) ) );\n}\n\n// Filmic tonemapping from\n// http://filmicgames.com/archives/75\n\nconst float A = 0.15;\nconst float B = 0.50;\nconst float C = 0.10;\nconst float D = 0.20;\nconst float E = 0.02;\nconst float F = 0.30;\n\nvec3 Uncharted2Tonemap( vec3 x )\n{\n\treturn ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;\n}\n\n// From \"I'm doing it wrong\"\n// http://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/\nfloat getAttenuation( vec3 lightPosition, vec3 vertexPosition, float lightRadius )\n{\n\tfloat r\t\t\t\t= lightRadius;\n\tvec3 L\t\t\t\t= lightPosition - vertexPosition;\n\tfloat dist\t\t\t= length(L);\n\tfloat d\t\t\t\t= max( dist - r, 0.0 );\n\tL\t\t\t\t\t/= dist;\n\tfloat denom\t\t\t= d / r + 1.0;\n\tfloat attenuation\t= 1.0 / (denom*denom);\n\tfloat cutoff\t\t= 0.0052;\n\tattenuation\t\t\t= (attenuation - cutoff) / (1.0 - cutoff);\n\tattenuation\t\t\t= max(attenuation, 0.0);\n\t\n\treturn attenuation;\n}\n\n// https://www.shadertoy.com/view/4ssXRX\n//note: uniformly distributed, normalized rand, [0;1[\nfloat nrand( vec2 n )\n{\n\treturn fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);\n}\nfloat random( vec2 n, float seed )\n{\n\tfloat t = fract( seed );\n\tfloat nrnd0 = nrand( n + 0.07*t );\n\tfloat nrnd1 = nrand( n + 0.11*t );\n\tfloat nrnd2 = nrand( n + 0.13*t );\n\tfloat nrnd3 = nrand( n + 0.17*t );\n\treturn (nrnd0+nrnd1+nrnd2+nrnd3) / 4.0;\n}\n\nconst vec3 lightColor = vec3(.92, .92, 1.0);\nconst float lightRadius = 400.0;\n\nvoid main(void) {\n\t// get the normal, light, position and half vector normalized\n\tvec3 N                  = normalize( vNormal );\n\tvec3 L                  = normalize( vLightPosition - vPosition );\n\tvec3 V                  = normalize( -vPosition );\n\tvec3 H\t\t\t\t\t= normalize(V + L);\n\t\n\t// get all the usefull dot products and clamp them between 0 and 1 just to be safe\n\tfloat NoL\t\t\t\t= saturate( dot( N, L ) );\n\tfloat NoV\t\t\t\t= saturate( dot( N, V ) );\n\tfloat VoH\t\t\t\t= saturate( dot( V, H ) );\n\tfloat NoH\t\t\t\t= saturate( dot( N, H ) );\n\n\tvec3 diffuseColor\t\t= baseColor - baseColor * metallic;\n\n\t// deduce the specular color from the baseColor and how metallic the material is\n\tvec3 specularColor\t\t= mix( vec3( 0.08 * specular ), baseColor, metallic );\n\n\t// compute the brdf terms\n\tfloat distribution\t\t= getNormalDistribution( roughness, NoH );\n\tvec3 fresnel\t\t\t= getFresnel( specularColor, VoH );\n\tfloat geom\t\t\t\t= getGeometricShadowing( roughness, NoV, NoL, VoH, L, V );\n\n\t// get the specular and diffuse and combine them\n\tvec3 diffuse\t\t\t= getDiffuse( diffuseColor, roughness, NoV, NoL, VoH );\n\tvec3 specular\t\t\t= NoL * ( distribution * fresnel * geom );\n\tvec3 color\t\t\t\t= lightColor * ( diffuse + specular );\n\n\t// get the light attenuation from its radius\n\tfloat attenuation\t\t= getAttenuation( vLightPosition, vPosition, lightRadius );\n\tcolor\t\t\t\t\t*= attenuation;\n\n\t// apply the tone-mapping\n\tcolor\t\t\t\t\t= Uncharted2Tonemap( color * exposure );\n\n\t// white balance\n\tconst float whiteInputLevel = 2.0;\n\tvec3 whiteScale\t\t\t= 1.0 / Uncharted2Tonemap( vec3( whiteInputLevel ) );\n\tcolor\t\t\t\t\t= color * whiteScale;\n\t\n\t// gamma correction\n\tcolor\t\t\t\t\t= pow( color, vec3( 1.0 / gamma ) );\n\n    gl_FragColor = vec4(color, 1.0);\n}");
 }
 
 var p = ViewBall.prototype = new bongiovi.View();
@@ -4582,7 +4528,7 @@ p.render = function(pos, lightPos, roughness, metallic) {
 };
 
 module.exports = ViewBall;
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // ViewBox.js
 
 var GL = bongiovi.GL;
@@ -4591,7 +4537,7 @@ var gl;
 
 function ViewBox() {
 	// bongiovi.View.call(this, bongiovi.ShaderLibs.get('generalWithNormalVert'), bongiovi.ShaderLibs.get('simpleColorLighting'));
-	bongiovi.View.call(this, "#define GLSLIFY 1\n\n// cubemap.vert\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vEye;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tvec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);\n    gl_Position = uPMatrix * mvPosition;\n    vTextureCoord = aTextureCoord;\n    vNormal = normalMatrix * aNormal;\n    vEye = normalize(mvPosition).rgb;\n    vVertex = aVertexPosition;\n}", "#define GLSLIFY 1\n\n// cubemap.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform samplerCube texture;\nuniform vec3 camera;\nvarying vec3 vNormal;\nvarying vec3 vEye;\nvarying vec3 vVertex;\n\nvoid main(void) {\n    gl_FragColor = textureCube(texture, vVertex);\n    // gl_FragColor = textureCube(texture, reflect(vEye, vNormal));\n    // gl_FragColor = textureCube(texture, refract(vEye, vNormal, 1.0));\n    // gl_FragColor = vec4(1.0);\n    // gl_FragColor.rgb = vNormal*.5+.5;\n}");
+	bongiovi.View.call(this, "#define GLSLIFY 1\n// cubemap.vert\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vEye;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tvec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);\n    gl_Position = uPMatrix * mvPosition;\n    vTextureCoord = aTextureCoord;\n    vNormal = normalMatrix * aNormal;\n    vEye = normalize(mvPosition).rgb;\n    vVertex = aVertexPosition;\n}", "#define GLSLIFY 1\n// cubemap.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform samplerCube texture;\nuniform vec3 camera;\nvarying vec3 vNormal;\nvarying vec3 vEye;\nvarying vec3 vVertex;\n\nvoid main(void) {\n    gl_FragColor = textureCube(texture, vVertex);\n    // gl_FragColor = textureCube(texture, reflect(vEye, vNormal));\n    // gl_FragColor = textureCube(texture, refract(vEye, vNormal, 1.0));\n    // gl_FragColor = vec4(1.0);\n    // gl_FragColor.rgb = vNormal*.5+.5;\n}");
 	// bongiovi.View.call(this, null, bongiovi.ShaderLibs.get('simpleColorFrag'));
 }
 
@@ -4617,7 +4563,61 @@ p.render = function(texture) {
 };
 
 module.exports = ViewBox;
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+// app.js
+window.bongiovi = require("./libs/bongiovi.js");
+var dat = require("dat-gui");
+
+(function() {
+	var SceneApp = require("./SceneApp");
+
+	App = function() {
+
+		var loader = new bongiovi.SimpleImageLoader();
+		loader.load([
+			"assets/negx.jpg",
+			"assets/negy.jpg",
+			"assets/negz.jpg",
+			"assets/posx.jpg",
+			"assets/posy.jpg",
+			"assets/posz.jpg"
+			], this, this._onImageLoaded);
+	}
+
+	var p = App.prototype;
+
+	p._onImageLoaded = function(img) {
+		window.images = img;
+
+		if(document.body) this._init();
+		else {
+			window.addEventListener("load", this._init.bind(this));
+		}
+	};
+
+	p._init = function() {
+		this.canvas = document.createElement("canvas");
+		this.canvas.width = window.innerWidth;
+		this.canvas.height = window.innerHeight;
+		this.canvas.className = "Main-Canvas";
+		document.body.appendChild(this.canvas);
+		bongiovi.GL.init(this.canvas);
+
+		this._scene = new SceneApp();
+		bongiovi.Scheduler.addEF(this, this._loop);
+
+		// this.gui = new dat.GUI({width:300});
+	};
+
+	p._loop = function() {
+		this._scene.loop();
+	};
+
+})();
+
+
+new App();
+},{"./SceneApp":4,"./libs/bongiovi.js":8,"dat-gui":1}],8:[function(require,module,exports){
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.bongiovi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 "use strict";
@@ -19285,4 +19285,4 @@ module.exports = ViewDotPlanes;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[1]);
+},{}]},{},[7]);

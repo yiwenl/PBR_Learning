@@ -27,6 +27,6 @@ void main(void) {
 	vTextureCoord  = aTextureCoord;
 	vPosition      = pos;
 	vNormalOrg     = normalize(aVertexPosition);
-	vNormal        = normalMatrix * vNormalOrg;
+	vNormal        = vNormalOrg;
 	vLightPosition = lightPosition;
 }
