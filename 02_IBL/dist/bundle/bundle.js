@@ -4635,41 +4635,6 @@ new App();
 },{"./SceneApp":4,"./libs/bongiovi.js":8,"dat-gui":1}],8:[function(require,module,exports){
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.bongiovi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-"use strict";
-
-var GLTools = _dereq_("./bongiovi/GLTools");
-
-var bongiovi = {
-	GL:GLTools,
-	GLTools:GLTools,
-	Scheduler:_dereq_("./bongiovi/Scheduler"),
-	SimpleImageLoader:_dereq_("./bongiovi/SimpleImageLoader"),
-	EaseNumber:_dereq_("./bongiovi/EaseNumber"),
-	QuatRotation:_dereq_("./bongiovi/QuatRotation"),
-	Scene:_dereq_("./bongiovi/Scene"),
-	Camera:_dereq_("./bongiovi/Camera"),
-	SimpleCamera:_dereq_("./bongiovi/SimpleCamera"),
-	CameraOrtho:_dereq_("./bongiovi/CameraOrtho"),
-	CameraPerspective:_dereq_("./bongiovi/CameraPerspective"),
-	Mesh:_dereq_("./bongiovi/Mesh"),
-	Face:_dereq_("./bongiovi/Face"),
-	GLShader:_dereq_("./bongiovi/GLShader"),
-	GLTexture:_dereq_("./bongiovi/GLTexture"),
-	GLCubeTexture:_dereq_("./bongiovi/GLCubeTexture"),
-	ShaderLibs:_dereq_("./bongiovi/ShaderLibs"),
-	View:_dereq_("./bongiovi/View"),
-	ViewCopy:_dereq_("./bongiovi/ViewCopy"),
-	ViewAxis:_dereq_("./bongiovi/ViewAxis"),
-	ViewDotPlane:_dereq_("./bongiovi/ViewDotPlanes"),
-	MeshUtils:_dereq_("./bongiovi/MeshUtils"),
-	FrameBuffer:_dereq_("./bongiovi/FrameBuffer"),
-	EventDispatcher:_dereq_("./bongiovi/EventDispatcher"),
-	ObjLoader:_dereq_("./bongiovi/ObjLoader"),
-	glm:_dereq_("gl-matrix")
-};
-
-module.exports = bongiovi;
-},{"./bongiovi/Camera":3,"./bongiovi/CameraOrtho":4,"./bongiovi/CameraPerspective":5,"./bongiovi/EaseNumber":6,"./bongiovi/EventDispatcher":7,"./bongiovi/Face":8,"./bongiovi/FrameBuffer":9,"./bongiovi/GLCubeTexture":10,"./bongiovi/GLShader":11,"./bongiovi/GLTexture":12,"./bongiovi/GLTools":13,"./bongiovi/Mesh":14,"./bongiovi/MeshUtils":15,"./bongiovi/ObjLoader":16,"./bongiovi/QuatRotation":17,"./bongiovi/Scene":18,"./bongiovi/Scheduler":19,"./bongiovi/ShaderLibs":20,"./bongiovi/SimpleCamera":21,"./bongiovi/SimpleImageLoader":22,"./bongiovi/View":23,"./bongiovi/ViewAxis":24,"./bongiovi/ViewCopy":25,"./bongiovi/ViewDotPlanes":26,"gl-matrix":2}],2:[function(_dereq_,module,exports){
 /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
  * @author Brandon Jones
@@ -6572,41 +6537,6 @@ mat2.invert = function(out, a) {
 
     if (!det) {
         return (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.bongiovi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-"use strict";
-
-var GLTools = _dereq_("./bongiovi/GLTools");
-
-var bongiovi = {
-	GL:GLTools,
-	GLTools:GLTools,
-	Scheduler:_dereq_("./bongiovi/Scheduler"),
-	SimpleImageLoader:_dereq_("./bongiovi/SimpleImageLoader"),
-	EaseNumber:_dereq_("./bongiovi/EaseNumber"),
-	QuatRotation:_dereq_("./bongiovi/QuatRotation"),
-	Scene:_dereq_("./bongiovi/Scene"),
-	Camera:_dereq_("./bongiovi/Camera"),
-	SimpleCamera:_dereq_("./bongiovi/SimpleCamera"),
-	CameraOrtho:_dereq_("./bongiovi/CameraOrtho"),
-	CameraPerspective:_dereq_("./bongiovi/CameraPerspective"),
-	Mesh:_dereq_("./bongiovi/Mesh"),
-	Face:_dereq_("./bongiovi/Face"),
-	GLShader:_dereq_("./bongiovi/GLShader"),
-	GLTexture:_dereq_("./bongiovi/GLTexture"),
-	GLCubeTexture:_dereq_("./bongiovi/GLCubeTexture"),
-	ShaderLibs:_dereq_("./bongiovi/ShaderLibs"),
-	View:_dereq_("./bongiovi/View"),
-	ViewCopy:_dereq_("./bongiovi/ViewCopy"),
-	ViewAxis:_dereq_("./bongiovi/ViewAxis"),
-	ViewDotPlane:_dereq_("./bongiovi/ViewDotPlanes"),
-	MeshUtils:_dereq_("./bongiovi/MeshUtils"),
-	FrameBuffer:_dereq_("./bongiovi/FrameBuffer"),
-	EventDispatcher:_dereq_("./bongiovi/EventDispatcher"),
-	ObjLoader:_dereq_("./bongiovi/ObjLoader"),
-	glm:_dereq_("gl-matrix")
-};
-
-module.exports = bongiovi;
-},{"./bongiovi/Camera":3,"./bongiovi/CameraOrtho":4,"./bongiovi/CameraPerspective":5,"./bongiovi/EaseNumber":6,"./bongiovi/EventDispatcher":7,"./bongiovi/Face":8,"./bongiovi/FrameBuffer":9,"./bongiovi/GLCubeTexture":10,"./bongiovi/GLShader":11,"./bongiovi/GLTexture":12,"./bongiovi/GLTools":13,"./bongiovi/Mesh":14,"./bongiovi/MeshUtils":15,"./bongiovi/ObjLoader":16,"./bongiovi/QuatRotation":17,"./bongiovi/Scene":18,"./bongiovi/Scheduler":19,"./bongiovi/ShaderLibs":20,"./bongiovi/SimpleCamera":21,"./bongiovi/SimpleImageLoader":22,"./bongiovi/View":23,"./bongiovi/ViewAxis":24,"./bongiovi/ViewCopy":25,"./bongiovi/ViewDotPlanes":26,"gl-matrix":2}],2:[function(_dereq_,module,exports){
 /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
  * @author Brandon Jones
@@ -10856,7 +10786,42 @@ if(typeof(exports) !== 'undefined') {
   })(shim.exports);
 })(this);
 
-},{}],3:[function(_dereq_,module,exports){
+},{}],2:[function(_dereq_,module,exports){
+"use strict";
+
+var GLTools = _dereq_("./bongiovi/GLTools");
+
+var bongiovi = {
+	GL:GLTools,
+	GLTools:GLTools,
+	Scheduler:_dereq_("./bongiovi/Scheduler"),
+	SimpleImageLoader:_dereq_("./bongiovi/SimpleImageLoader"),
+	EaseNumber:_dereq_("./bongiovi/EaseNumber"),
+	QuatRotation:_dereq_("./bongiovi/QuatRotation"),
+	Scene:_dereq_("./bongiovi/Scene"),
+	Camera:_dereq_("./bongiovi/Camera"),
+	SimpleCamera:_dereq_("./bongiovi/SimpleCamera"),
+	CameraOrtho:_dereq_("./bongiovi/CameraOrtho"),
+	CameraPerspective:_dereq_("./bongiovi/CameraPerspective"),
+	Mesh:_dereq_("./bongiovi/Mesh"),
+	Face:_dereq_("./bongiovi/Face"),
+	GLShader:_dereq_("./bongiovi/GLShader"),
+	GLTexture:_dereq_("./bongiovi/GLTexture"),
+	GLCubeTexture:_dereq_("./bongiovi/GLCubeTexture"),
+	ShaderLibs:_dereq_("./bongiovi/ShaderLibs"),
+	View:_dereq_("./bongiovi/View"),
+	ViewCopy:_dereq_("./bongiovi/ViewCopy"),
+	ViewAxis:_dereq_("./bongiovi/ViewAxis"),
+	ViewDotPlane:_dereq_("./bongiovi/ViewDotPlanes"),
+	MeshUtils:_dereq_("./bongiovi/MeshUtils"),
+	FrameBuffer:_dereq_("./bongiovi/FrameBuffer"),
+	EventDispatcher:_dereq_("./bongiovi/EventDispatcher"),
+	ObjLoader:_dereq_("./bongiovi/ObjLoader"),
+	glm:_dereq_("gl-matrix")
+};
+
+module.exports = bongiovi;
+},{"./bongiovi/Camera":3,"./bongiovi/CameraOrtho":4,"./bongiovi/CameraPerspective":5,"./bongiovi/EaseNumber":6,"./bongiovi/EventDispatcher":7,"./bongiovi/Face":8,"./bongiovi/FrameBuffer":9,"./bongiovi/GLCubeTexture":10,"./bongiovi/GLShader":11,"./bongiovi/GLTexture":12,"./bongiovi/GLTools":13,"./bongiovi/Mesh":14,"./bongiovi/MeshUtils":15,"./bongiovi/ObjLoader":16,"./bongiovi/QuatRotation":17,"./bongiovi/Scene":18,"./bongiovi/Scheduler":19,"./bongiovi/ShaderLibs":20,"./bongiovi/SimpleCamera":21,"./bongiovi/SimpleImageLoader":22,"./bongiovi/View":23,"./bongiovi/ViewAxis":24,"./bongiovi/ViewCopy":25,"./bongiovi/ViewDotPlanes":26,"gl-matrix":1}],3:[function(_dereq_,module,exports){
 "use strict";
 
 var glm = _dereq_("gl-matrix");
@@ -10881,7 +10846,7 @@ p.getMatrix = function() {
 };
 
 module.exports = Camera;
-},{"gl-matrix":2}],4:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],4:[function(_dereq_,module,exports){
 // CameraOrtho.js
 
 "use strict";
@@ -10926,7 +10891,7 @@ p.resize = function() {
 
 
 module.exports = CameraOrtho;
-},{"./Camera":3,"gl-matrix":2}],5:[function(_dereq_,module,exports){
+},{"./Camera":3,"gl-matrix":1}],5:[function(_dereq_,module,exports){
 // CameraPerspective.js
 "use strict";
 
@@ -10969,7 +10934,7 @@ p.__defineGetter__("far", function() {
 });
 
 module.exports = CameraPerspective;
-},{"./Camera":3,"gl-matrix":2}],6:[function(_dereq_,module,exports){
+},{"./Camera":3,"gl-matrix":1}],6:[function(_dereq_,module,exports){
 // EaseNumber.js
 
 "use strict";
@@ -11206,7 +11171,7 @@ var equal = function(mV0, mV1) {
 };
 
 module.exports = Face;
-},{"gl-matrix":2}],9:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],9:[function(_dereq_,module,exports){
 "use strict";
 
 var gl, GL = _dereq_("./GLTools");
@@ -11377,11 +11342,14 @@ var GLCubeTexture = function(sources, options) {
 		} else {
 			gl.texImage2D(targets[j], 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sources[j]);	
 		}
-	    
-	    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
-	    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
-	    gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+		    
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, this.magFilter);
+    	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter);
 	}
+
+	gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
 	
 
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
@@ -12041,7 +12009,7 @@ GLTools.getInstance = function() {
 
 
 module.exports = GLTools.getInstance();
-},{"gl-matrix":2}],14:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],14:[function(_dereq_,module,exports){
 "use strict";
 
 var Face = _dereq_("./Face");
@@ -12215,7 +12183,7 @@ p._generateFaces = function() {
 };
 
 module.exports = Mesh;
-},{"./Face":8,"./GLTools":13,"gl-matrix":2}],15:[function(_dereq_,module,exports){
+},{"./Face":8,"./GLTools":13,"gl-matrix":1}],15:[function(_dereq_,module,exports){
 "use strict";
 
 var GL = _dereq_("./GLTools");
@@ -13207,7 +13175,7 @@ p._updateRotation = function(aTempRotation) {
 
 
 module.exports = QuatRotation;
-},{"gl-matrix":2}],18:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],18:[function(_dereq_,module,exports){
 "use strict";
 
 var GL = _dereq_("./GLTools");
@@ -13293,7 +13261,7 @@ p._onResize = function() {
 };
 
 module.exports = Scene;
-},{"./CameraOrtho":4,"./GLTools":13,"./QuatRotation":17,"./SimpleCamera":21,"gl-matrix":2}],19:[function(_dereq_,module,exports){
+},{"./CameraOrtho":4,"./GLTools":13,"./QuatRotation":17,"./SimpleCamera":21,"gl-matrix":1}],19:[function(_dereq_,module,exports){
 // Scheduler.js
 
 "use strict";
@@ -13453,24 +13421,24 @@ var ShaderLibs = function() { };
 
 ShaderLibs.shaders = {};
 
-ShaderLibs.shaders.copyVert = "#define GLSLIFY 1\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
-ShaderLibs.shaders.copyNormalVert = "#define GLSLIFY 1\n\n// copyWithNormals.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = aNormal;\n\tvVertex \t  = aVertexPosition;\n}";
+ShaderLibs.shaders.copyVert = "#define GLSLIFY 1\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
+ShaderLibs.shaders.copyNormalVert = "#define GLSLIFY 1\n// copyWithNormals.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = aNormal;\n\tvVertex \t  = aVertexPosition;\n}";
 
-ShaderLibs.shaders.generalVert = "#define GLSLIFY 1\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    vec3 pos = aVertexPosition;\n    pos *= scale;\n    pos += position;\n    gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
-ShaderLibs.shaders.generalNormalVert = "#define GLSLIFY 1\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
-ShaderLibs.shaders.generalWithNormalVert = "#define GLSLIFY 1\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
+ShaderLibs.shaders.generalVert = "#define GLSLIFY 1\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    vec3 pos = aVertexPosition;\n    pos *= scale;\n    pos += position;\n    gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
+ShaderLibs.shaders.generalNormalVert = "#define GLSLIFY 1\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
+ShaderLibs.shaders.generalWithNormalVert = "#define GLSLIFY 1\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
 
-ShaderLibs.shaders.copyFrag = "#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n}\n";
+ShaderLibs.shaders.copyFrag = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n}\n";
 
 
-ShaderLibs.shaders.alphaFrag = "#define GLSLIFY 1\n\n#define SHADER_NAME TEXTURE_WITH_ALPHA\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n    gl_FragColor.a *= opacity;\n}";
+ShaderLibs.shaders.alphaFrag = "#define GLSLIFY 1\n#define SHADER_NAME TEXTURE_WITH_ALPHA\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n    gl_FragColor.a *= opacity;\n}";
 
-ShaderLibs.shaders.simpleColorFrag = "#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_COLOR_FRAGMENT\n\nprecision highp float;\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}";
+ShaderLibs.shaders.simpleColorFrag = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_COLOR_FRAGMENT\n\nprecision highp float;\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}";
 
-ShaderLibs.shaders.depthFrag = "#define GLSLIFY 1\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float n;\nuniform float f;\n\nfloat getDepth(float z) {\n\treturn (6.0 * n) / (f + n - z*(f-n));\n}\n\nvoid main(void) {\n    float r = texture2D(texture, vTextureCoord).r;\n    float grey = getDepth(r);\n    gl_FragColor = vec4(grey, grey, grey, 1.0);\n}";
+ShaderLibs.shaders.depthFrag = "#define GLSLIFY 1\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float n;\nuniform float f;\n\nfloat getDepth(float z) {\n\treturn (6.0 * n) / (f + n - z*(f-n));\n}\n\nvoid main(void) {\n    float r = texture2D(texture, vTextureCoord).r;\n    float grey = getDepth(r);\n    gl_FragColor = vec4(grey, grey, grey, 1.0);\n}";
 
-ShaderLibs.shaders.simpleCopyLighting = "#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_TEXTURE_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\tvec4 color \t  = texture2D(texture, vTextureCoord);\n\tcolor.rgb \t  *= light;\n\t\n\tgl_FragColor  = color;\n}";
-ShaderLibs.shaders.simpleColorLighting = "#define GLSLIFY 1\n\n// simpleColorLighting.frag\n\n#define SHADER_NAME SIMPLE_COLOR_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform vec3 color;\nuniform float opacity;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\t\n\tgl_FragColor  = vec4(color * light, opacity);\n}";
+ShaderLibs.shaders.simpleCopyLighting = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\tvec4 color \t  = texture2D(texture, vTextureCoord);\n\tcolor.rgb \t  *= light;\n\t\n\tgl_FragColor  = color;\n}";
+ShaderLibs.shaders.simpleColorLighting = "#define GLSLIFY 1\n// simpleColorLighting.frag\n\n#define SHADER_NAME SIMPLE_COLOR_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform vec3 color;\nuniform float opacity;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\t\n\tgl_FragColor  = vec4(color * light, opacity);\n}";
 
 
 
@@ -13500,7 +13468,6 @@ var s = CameraPerspective.prototype;
 p._init = function() {
 	this.radius          = new EaseNumber(500);
 	this.position[2]     = this.radius.value;
-	this.positionOffset  = glm.vec3.create();
 	this.center          = glm.vec3.create( );
 	this.up              = glm.vec3.clone( [0,-1,0] );
 	this.lookAt(this.position, this.center, this.up);
@@ -13624,11 +13591,12 @@ p.getMatrix = function() {
 
 
 p._updateCameraPosition = function() {
+	this.position[2] 	= this.radius.value;
+
 	this.position[1] = Math.sin(this._rx.value) * this.radius.value;
 	var tr = Math.cos(this._rx.value) * this.radius.value;
 	this.position[0] = Math.cos(this._ry.value + Math.PI*0.5) * tr;
 	this.position[2] = Math.sin(this._ry.value + Math.PI*0.5) * tr;
-	glm.vec3.add(this.position, this.position, this.positionOffset);
 };
 
 
@@ -13663,7 +13631,7 @@ p.__defineSetter__("ry", function(mValue) {
 });
 
 module.exports = SimpleCamera;
-},{"./CameraPerspective":5,"./EaseNumber":6,"gl-matrix":2}],22:[function(_dereq_,module,exports){
+},{"./CameraPerspective":5,"./EaseNumber":6,"gl-matrix":1}],22:[function(_dereq_,module,exports){
 "use strict";
 
 var SimpleImageLoader = function() {
@@ -13901,7 +13869,7 @@ p.render = function() {
 
 module.exports = ViewDotPlanes;
 
-},{"./GLTools":13,"./Mesh":14,"./ShaderLibs":20,"./View":23}]},{},[1])(1)
+},{"./GLTools":13,"./Mesh":14,"./ShaderLibs":20,"./View":23}]},{},[2])(2)
 });
 
 ;
@@ -16252,7 +16220,42 @@ if(typeof(exports) !== 'undefined') {
   })(shim.exports);
 })(this);
 
-},{}],3:[function(_dereq_,module,exports){
+},{}],2:[function(_dereq_,module,exports){
+"use strict";
+
+var GLTools = _dereq_("./bongiovi/GLTools");
+
+var bongiovi = {
+	GL:GLTools,
+	GLTools:GLTools,
+	Scheduler:_dereq_("./bongiovi/Scheduler"),
+	SimpleImageLoader:_dereq_("./bongiovi/SimpleImageLoader"),
+	EaseNumber:_dereq_("./bongiovi/EaseNumber"),
+	QuatRotation:_dereq_("./bongiovi/QuatRotation"),
+	Scene:_dereq_("./bongiovi/Scene"),
+	Camera:_dereq_("./bongiovi/Camera"),
+	SimpleCamera:_dereq_("./bongiovi/SimpleCamera"),
+	CameraOrtho:_dereq_("./bongiovi/CameraOrtho"),
+	CameraPerspective:_dereq_("./bongiovi/CameraPerspective"),
+	Mesh:_dereq_("./bongiovi/Mesh"),
+	Face:_dereq_("./bongiovi/Face"),
+	GLShader:_dereq_("./bongiovi/GLShader"),
+	GLTexture:_dereq_("./bongiovi/GLTexture"),
+	GLCubeTexture:_dereq_("./bongiovi/GLCubeTexture"),
+	ShaderLibs:_dereq_("./bongiovi/ShaderLibs"),
+	View:_dereq_("./bongiovi/View"),
+	ViewCopy:_dereq_("./bongiovi/ViewCopy"),
+	ViewAxis:_dereq_("./bongiovi/ViewAxis"),
+	ViewDotPlane:_dereq_("./bongiovi/ViewDotPlanes"),
+	MeshUtils:_dereq_("./bongiovi/MeshUtils"),
+	FrameBuffer:_dereq_("./bongiovi/FrameBuffer"),
+	EventDispatcher:_dereq_("./bongiovi/EventDispatcher"),
+	ObjLoader:_dereq_("./bongiovi/ObjLoader"),
+	glm:_dereq_("gl-matrix")
+};
+
+module.exports = bongiovi;
+},{"./bongiovi/Camera":3,"./bongiovi/CameraOrtho":4,"./bongiovi/CameraPerspective":5,"./bongiovi/EaseNumber":6,"./bongiovi/EventDispatcher":7,"./bongiovi/Face":8,"./bongiovi/FrameBuffer":9,"./bongiovi/GLCubeTexture":10,"./bongiovi/GLShader":11,"./bongiovi/GLTexture":12,"./bongiovi/GLTools":13,"./bongiovi/Mesh":14,"./bongiovi/MeshUtils":15,"./bongiovi/ObjLoader":16,"./bongiovi/QuatRotation":17,"./bongiovi/Scene":18,"./bongiovi/Scheduler":19,"./bongiovi/ShaderLibs":20,"./bongiovi/SimpleCamera":21,"./bongiovi/SimpleImageLoader":22,"./bongiovi/View":23,"./bongiovi/ViewAxis":24,"./bongiovi/ViewCopy":25,"./bongiovi/ViewDotPlanes":26,"gl-matrix":1}],3:[function(_dereq_,module,exports){
 "use strict";
 
 var glm = _dereq_("gl-matrix");
@@ -16277,7 +16280,7 @@ p.getMatrix = function() {
 };
 
 module.exports = Camera;
-},{"gl-matrix":2}],4:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],4:[function(_dereq_,module,exports){
 // CameraOrtho.js
 
 "use strict";
@@ -16322,7 +16325,7 @@ p.resize = function() {
 
 
 module.exports = CameraOrtho;
-},{"./Camera":3,"gl-matrix":2}],5:[function(_dereq_,module,exports){
+},{"./Camera":3,"gl-matrix":1}],5:[function(_dereq_,module,exports){
 // CameraPerspective.js
 "use strict";
 
@@ -16365,7 +16368,7 @@ p.__defineGetter__("far", function() {
 });
 
 module.exports = CameraPerspective;
-},{"./Camera":3,"gl-matrix":2}],6:[function(_dereq_,module,exports){
+},{"./Camera":3,"gl-matrix":1}],6:[function(_dereq_,module,exports){
 // EaseNumber.js
 
 "use strict";
@@ -16602,7 +16605,7 @@ var equal = function(mV0, mV1) {
 };
 
 module.exports = Face;
-},{"gl-matrix":2}],9:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],9:[function(_dereq_,module,exports){
 "use strict";
 
 var gl, GL = _dereq_("./GLTools");
@@ -16773,11 +16776,14 @@ var GLCubeTexture = function(sources, options) {
 		} else {
 			gl.texImage2D(targets[j], 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sources[j]);	
 		}
-	    
-	    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
-	    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
-	    gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+		    
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, this.magFilter);
+    	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter);
 	}
+
+	gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
 	
 
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
@@ -17437,7 +17443,7 @@ GLTools.getInstance = function() {
 
 
 module.exports = GLTools.getInstance();
-},{"gl-matrix":2}],14:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],14:[function(_dereq_,module,exports){
 "use strict";
 
 var Face = _dereq_("./Face");
@@ -17611,7 +17617,7 @@ p._generateFaces = function() {
 };
 
 module.exports = Mesh;
-},{"./Face":8,"./GLTools":13,"gl-matrix":2}],15:[function(_dereq_,module,exports){
+},{"./Face":8,"./GLTools":13,"gl-matrix":1}],15:[function(_dereq_,module,exports){
 "use strict";
 
 var GL = _dereq_("./GLTools");
@@ -18603,7 +18609,7 @@ p._updateRotation = function(aTempRotation) {
 
 
 module.exports = QuatRotation;
-},{"gl-matrix":2}],18:[function(_dereq_,module,exports){
+},{"gl-matrix":1}],18:[function(_dereq_,module,exports){
 "use strict";
 
 var GL = _dereq_("./GLTools");
@@ -18689,7 +18695,7 @@ p._onResize = function() {
 };
 
 module.exports = Scene;
-},{"./CameraOrtho":4,"./GLTools":13,"./QuatRotation":17,"./SimpleCamera":21,"gl-matrix":2}],19:[function(_dereq_,module,exports){
+},{"./CameraOrtho":4,"./GLTools":13,"./QuatRotation":17,"./SimpleCamera":21,"gl-matrix":1}],19:[function(_dereq_,module,exports){
 // Scheduler.js
 
 "use strict";
@@ -18849,24 +18855,24 @@ var ShaderLibs = function() { };
 
 ShaderLibs.shaders = {};
 
-ShaderLibs.shaders.copyVert = "#define GLSLIFY 1\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
-ShaderLibs.shaders.copyNormalVert = "#define GLSLIFY 1\n\n// copyWithNormals.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = aNormal;\n\tvVertex \t  = aVertexPosition;\n}";
+ShaderLibs.shaders.copyVert = "#define GLSLIFY 1\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
+ShaderLibs.shaders.copyNormalVert = "#define GLSLIFY 1\n// copyWithNormals.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoord = aTextureCoord;\n\tvNormal       = aNormal;\n\tvVertex \t  = aVertexPosition;\n}";
 
-ShaderLibs.shaders.generalVert = "#define GLSLIFY 1\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    vec3 pos = aVertexPosition;\n    pos *= scale;\n    pos += position;\n    gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
-ShaderLibs.shaders.generalNormalVert = "#define GLSLIFY 1\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
-ShaderLibs.shaders.generalWithNormalVert = "#define GLSLIFY 1\n\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
+ShaderLibs.shaders.generalVert = "#define GLSLIFY 1\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n    vec3 pos = aVertexPosition;\n    pos *= scale;\n    pos += position;\n    gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
+ShaderLibs.shaders.generalNormalVert = "#define GLSLIFY 1\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
+ShaderLibs.shaders.generalWithNormalVert = "#define GLSLIFY 1\n#define SHADER_NAME GENERAL_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec3 position;\nuniform vec3 scale;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n\tvec3 pos      = aVertexPosition;\n\tpos           *= scale;\n\tpos           += position;\n\tgl_Position   = uPMatrix * uMVMatrix * vec4(pos, 1.0);\n\tvTextureCoord = aTextureCoord;\n\t\n\tvNormal       = aNormal;\n\tvVertex       = pos;\n}";
 
-ShaderLibs.shaders.copyFrag = "#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n}\n";
+ShaderLibs.shaders.copyFrag = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n}\n";
 
 
-ShaderLibs.shaders.alphaFrag = "#define GLSLIFY 1\n\n#define SHADER_NAME TEXTURE_WITH_ALPHA\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n    gl_FragColor.a *= opacity;\n}";
+ShaderLibs.shaders.alphaFrag = "#define GLSLIFY 1\n#define SHADER_NAME TEXTURE_WITH_ALPHA\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = texture2D(texture, vTextureCoord);\n    gl_FragColor.a *= opacity;\n}";
 
-ShaderLibs.shaders.simpleColorFrag = "#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_COLOR_FRAGMENT\n\nprecision highp float;\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}";
+ShaderLibs.shaders.simpleColorFrag = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_COLOR_FRAGMENT\n\nprecision highp float;\nuniform vec3 color;\nuniform float opacity;\n\nvoid main(void) {\n    gl_FragColor = vec4(color, opacity);\n}";
 
-ShaderLibs.shaders.depthFrag = "#define GLSLIFY 1\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float n;\nuniform float f;\n\nfloat getDepth(float z) {\n\treturn (6.0 * n) / (f + n - z*(f-n));\n}\n\nvoid main(void) {\n    float r = texture2D(texture, vTextureCoord).r;\n    float grey = getDepth(r);\n    gl_FragColor = vec4(grey, grey, grey, 1.0);\n}";
+ShaderLibs.shaders.depthFrag = "#define GLSLIFY 1\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform float n;\nuniform float f;\n\nfloat getDepth(float z) {\n\treturn (6.0 * n) / (f + n - z*(f-n));\n}\n\nvoid main(void) {\n    float r = texture2D(texture, vTextureCoord).r;\n    float grey = getDepth(r);\n    gl_FragColor = vec4(grey, grey, grey, 1.0);\n}";
 
-ShaderLibs.shaders.simpleCopyLighting = "#define GLSLIFY 1\n\n#define SHADER_NAME SIMPLE_TEXTURE_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\tvec4 color \t  = texture2D(texture, vTextureCoord);\n\tcolor.rgb \t  *= light;\n\t\n\tgl_FragColor  = color;\n}";
-ShaderLibs.shaders.simpleColorLighting = "#define GLSLIFY 1\n\n// simpleColorLighting.frag\n\n#define SHADER_NAME SIMPLE_COLOR_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform vec3 color;\nuniform float opacity;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\t\n\tgl_FragColor  = vec4(color * light, opacity);\n}";
+ShaderLibs.shaders.simpleCopyLighting = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\tvec4 color \t  = texture2D(texture, vTextureCoord);\n\tcolor.rgb \t  *= light;\n\t\n\tgl_FragColor  = color;\n}";
+ShaderLibs.shaders.simpleColorLighting = "#define GLSLIFY 1\n// simpleColorLighting.frag\n\n#define SHADER_NAME SIMPLE_COLOR_LIGHTING\n\nprecision highp float;\n\nuniform vec3 ambient;\nuniform vec3 lightPosition;\nuniform vec3 lightColor;\nuniform float lightWeight;\n\nuniform vec3 color;\nuniform float opacity;\n\nvarying vec3 vVertex;\nvarying vec3 vNormal;\n\nvoid main(void) {\n\tvec3 L        = normalize(lightPosition-vVertex);\n\tfloat lambert = max(dot(vNormal, L), .0);\n\tvec3 light    = ambient + lightColor * lambert * lightWeight;\n\t\n\tgl_FragColor  = vec4(color * light, opacity);\n}";
 
 
 
@@ -18896,7 +18902,6 @@ var s = CameraPerspective.prototype;
 p._init = function() {
 	this.radius          = new EaseNumber(500);
 	this.position[2]     = this.radius.value;
-	this.positionOffset  = glm.vec3.create();
 	this.center          = glm.vec3.create( );
 	this.up              = glm.vec3.clone( [0,-1,0] );
 	this.lookAt(this.position, this.center, this.up);
@@ -19020,11 +19025,12 @@ p.getMatrix = function() {
 
 
 p._updateCameraPosition = function() {
+	this.position[2] 	= this.radius.value;
+
 	this.position[1] = Math.sin(this._rx.value) * this.radius.value;
 	var tr = Math.cos(this._rx.value) * this.radius.value;
 	this.position[0] = Math.cos(this._ry.value + Math.PI*0.5) * tr;
 	this.position[2] = Math.sin(this._ry.value + Math.PI*0.5) * tr;
-	glm.vec3.add(this.position, this.position, this.positionOffset);
 };
 
 
@@ -19059,7 +19065,7 @@ p.__defineSetter__("ry", function(mValue) {
 });
 
 module.exports = SimpleCamera;
-},{"./CameraPerspective":5,"./EaseNumber":6,"gl-matrix":2}],22:[function(_dereq_,module,exports){
+},{"./CameraPerspective":5,"./EaseNumber":6,"gl-matrix":1}],22:[function(_dereq_,module,exports){
 "use strict";
 
 var SimpleImageLoader = function() {
@@ -19297,7 +19303,7 @@ p.render = function() {
 
 module.exports = ViewDotPlanes;
 
-},{"./GLTools":13,"./Mesh":14,"./ShaderLibs":20,"./View":23}]},{},[1])(1)
+},{"./GLTools":13,"./Mesh":14,"./ShaderLibs":20,"./View":23}]},{},[2])(2)
 });
 
 
