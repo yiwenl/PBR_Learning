@@ -4424,6 +4424,7 @@ dat.utils.common);
 var GL = bongiovi.GL, gl;
 
 var ViewPrefilteredEnvMap = require("./ViewPrefilteredEnvMap");
+var ViewSphere = require("./ViewSphere");
 
 function SceneApp() {
 	gl = GL.gl;
@@ -4439,6 +4440,15 @@ p._initTextures = function() {
 	console.log('Init Textures');
 	this.textureMap = new bongiovi.GLTexture(images.uffizi);
 	this.textureNormal = new bongiovi.GLTexture(images.sphereNormal);
+
+	var size = 1024;
+	this.fbos = [];
+	for(var i=0; i<6; i++) {
+		// console.log('FBO size :', size);
+		var fbo = new bongiovi.FrameBuffer(size, size/2);
+		this.fbos.push(fbo)
+		// size /= 2;
+	}
 };
 
 p._initViews = function() {
@@ -4454,21 +4464,44 @@ p._initViews = function() {
 		var v = new ViewPrefilteredEnvMap(i);
 		this._envMaps.push(v);
 	}
+
+	this._vSphere = new ViewSphere();
+	this.prefilterEnvMap();
 };
 
-p.render = function() {
+
+p.prefilterEnvMap = function() {
 	GL.setMatrices(this.cameraOrtho);
 	GL.rotate(this.rotationFront);
 
-	var h = window.innerHeight / 6;
-	var w = Math.min(h*2, window.innerHeight);
 
 	for(var i=0; i<this._envMaps.length; i++) {
-		GL.setViewport(0, h*i, w, h);
-		var v = this._envMaps[i];
-		v.render(this.textureMap, this.textureNormal);
-	}
+		var fbo = this.fbos[i];
 
+		GL.setViewport(0, 0, fbo.width, fbo.height);
+		fbo.bind();
+		GL.clear(0, 0, 0, 0);
+		var v = this._envMaps[i];
+		v.render(this.textureMap, this.textureNormal);	
+		fbo.unbind();
+		
+	}
+};
+
+p.render = function() {
+	this._vAxis.render();
+	this._vDotPlane.render();
+
+	this._vSphere.render(this.textureMap, this.fbos);
+/*
+	GL.setMatrices(this.cameraOrtho);
+	GL.rotate(this.rotationFront);
+	GL.setViewport(0, 0, 1024, 512);
+	this._vCopy.render(this.fbos[0].getTexture());
+
+	GL.setViewport(0, 512, 1024, 512);
+	this._vCopy.render(this.textureMap);
+*/
 };
 
 p.resize = function() {
@@ -4477,7 +4510,7 @@ p.resize = function() {
 };
 
 module.exports = SceneApp;
-},{"./ViewPrefilteredEnvMap":5}],5:[function(require,module,exports){
+},{"./ViewPrefilteredEnvMap":5,"./ViewSphere":6}],5:[function(require,module,exports){
 // ViewPrefilteredEnvMap.j
 
 var GL = bongiovi.GL;
@@ -4487,7 +4520,7 @@ var gl;
 function ViewPrefilteredEnvMap(lod) {
 	lod = lod == undefined ? 5 : lod;
 	this._lod = lod;
-	var fs = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureNormal;\n\nuniform float\t\tuLod;\nuniform float\t\tuMaxLod;\nuniform float\t\tuSize;\n// uniform int\t\t\tnumSamples;\n\n\n// const int numSamples = 2730;\nconst int numSamples = {{NUM_SAMPLES}};\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.1415926535897932384626433832795\n#define TwoPI 3.1415926535897932384626433832795*2.0\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\n// Interesting page on Hammersley Points\n// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html#\nvec2 Hammersley(int index, int numSamples ){\n\t// int reversedIndex = index;\n\t// reversedIndex = (reversedIndex << 16) | (reversedIndex >> 16);\n\t// reversedIndex = ((reversedIndex & 0x00ff00ff) << 8) | ((reversedIndex & 0xff00ff00) >> 8);\n\t// reversedIndex = ((reversedIndex & 0x0f0f0f0f) << 4) | ((reversedIndex & 0xf0f0f0f0) >> 4);\n\t// reversedIndex = ((reversedIndex & 0x33333333) << 2) | ((reversedIndex & 0xcccccccc) >> 2);\n\t// reversedIndex = ((reversedIndex & 0x55555555) << 1) | ((reversedIndex & 0xaaaaaaaa) >> 1);\n\t\n\t// return vec2(fract(float(index) / numSamples), float(reversedIndex) * 2.3283064365386963e-10);\n\t// return vec2(fract(float(index) / float(numSamples)), 1.0);\n\treturn vec2(rand(vec2(float(index), float(numSamples))), rand(vec2(float(numSamples), float(index))));\n}\n\n// straight from Epic paper for Siggraph 2013 Shading course\n// http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_slides.pdf\n\nvec3 ImportanceSampleGGX( vec2 Xi, float Roughness4, vec3 N ) {\n\tfloat Phi = 2.0 * PI * Xi.x;\n\tfloat CosTheta = sqrt( (1.0 - Xi.y) / ( 1.0 + (Roughness4 - 1.0) * Xi.y ) );\n\tfloat SinTheta = sqrt( 1.0 - CosTheta * CosTheta );\n\t\n\tvec3 H;\n\tH.x = SinTheta * cos( Phi );\n\tH.y = SinTheta * sin( Phi );\n\tH.z = CosTheta;\n\t\n\tvec3 UpVector = abs( N.z ) < 0.999 ? vec3(0,0,1) : vec3(1,0,0);\n\tvec3 TangentX = normalize( cross( UpVector, N ) );\n\tvec3 TangentY = cross( N, TangentX );\n\t\n\t// Tangent to world space\n\treturn TangentX * H.x + TangentY * H.y + N * H.z;\n}\n\n\n// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/\nvec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {\n\tfloat M = max(max(abs(v.x), abs(v.y)), abs(v.z));\n\tfloat scale = 1.0 - exp2(lod) / cube_size;\n\tif (abs(v.x) != M) v.x *= scale;\n\tif (abs(v.y) != M) v.y *= scale;\n\tif (abs(v.z) != M) v.z *= scale;\n\treturn v;\n}\n\nvec2 envMapEquirect(vec3 wcNormal, float flipEnvMap) {\n  //I assume envMap texture has been flipped the WebGL way (pixel 0,0 is a the bottom)\n  //therefore we flip wcNorma.y as acos(1) = 0\n  float phi = acos(-wcNormal.y);\n  float theta = atan(flipEnvMap * wcNormal.x, wcNormal.z) + PI;\n  return vec2(theta / TwoPI, phi / PI);\n}\n\nvec2 envMapEquirect(vec3 wcNormal) {\n    //-1.0 for left handed coordinate system oriented texture (usual case)\n    return envMapEquirect(wcNormal, -1.0);\n}\n\n\nvec3 getTextureLod(sampler2D texture, vec3 N) {\n\tvec2 newUV = envMapEquirect(N);\n\treturn texture2D(texture, newUV).rgb;\n}\n\n\n\nvec3 PrefilterEnvMap( float roughness, vec3 R )\n{\n\tvec3 N = R;\n\tvec3 V = R;\n\t\n\tvec3 prefilteredColor = vec3(0.0);\n\tfloat  totalWeight      = 0.0;\n\t\n\t// int numSamples = 8192 / int( uMaxLod - uLod );\n\tfor(int i=0; i<numSamples; ++i)\n\t{\n\t\tvec2 xi  = Hammersley(i, numSamples);\n\t\tvec3 H   = ImportanceSampleGGX(xi, roughness, N);\n\t\tvec3 L   = 2.0 * dot(V, H) * H - V;\n\t\tfloat  NoL = saturate(dot(N, L));\n\t\tNoL = 1.0;\n\n\t\tif(NoL>0.0)\n\t\t{\n\t\t\tvec3 lookup = fix_cube_lookup( L, uSize, uLod );\n\t\t\t// prefilteredColor += getTextureLod( texture, L) * NoL;\n\t\t\tprefilteredColor += getTextureLod( texture, L) * NoL;\n\t\t\ttotalWeight += NoL;\n\t\t}\n\t}\n\t\n\treturn prefilteredColor / totalWeight;\n}\n\n\nvoid main(void) {\n\tvec3 color      = texture2D( texture, vTextureCoord ).rgb;\n\tfloat roughness = uLod / uMaxLod;\n\tvec3 N          = texture2D( textureNormal, vTextureCoord).rgb * 2.0 - 1.0;\n\tcolor           = PrefilterEnvMap( pow( roughness, 6.0 ), N );\n\t\n\tgl_FragColor    = vec4(color, 1.0);\n}";
+	var fs = "#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform sampler2D texture;\nuniform sampler2D textureNormal;\n\nuniform float\t\tuLod;\nuniform float\t\tuMaxLod;\nuniform float\t\tuSize;\n// uniform int\t\t\tnumSamples;\n\n\n\nconst float PI = 3.1415926535897932384626433832795;\nconst float TwoPI = PI * 2.0; \n\nconst int numSamples = {{NUM_SAMPLES}};\n#define saturate(x) clamp(x, 0.0, 1.0)\n\n// #define TwoPI 3.1415926535897932384626433832795*2.0\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\n// Interesting page on Hammersley Points\n// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html#\nvec2 Hammersley(int index, int numSamples ){\n\t// int reversedIndex = index;\n\t// reversedIndex = (reversedIndex << 16) | (reversedIndex >> 16);\n\t// reversedIndex = ((reversedIndex & 0x00ff00ff) << 8) | ((reversedIndex & 0xff00ff00) >> 8);\n\t// reversedIndex = ((reversedIndex & 0x0f0f0f0f) << 4) | ((reversedIndex & 0xf0f0f0f0) >> 4);\n\t// reversedIndex = ((reversedIndex & 0x33333333) << 2) | ((reversedIndex & 0xcccccccc) >> 2);\n\t// reversedIndex = ((reversedIndex & 0x55555555) << 1) | ((reversedIndex & 0xaaaaaaaa) >> 1);\n\t\n\t// return vec2(fract(float(index) / numSamples), float(reversedIndex) * 2.3283064365386963e-10);\n\t// return vec2(fract(float(index) / float(numSamples)), 1.0);\n\treturn vec2(rand(vec2(float(index), float(numSamples))), rand(vec2(float(numSamples), float(index))));\n\t// return vec2(fract(float(index) / float(numSamples)), rand(vec2(float(numSamples), float(index))));\n}\n\n// straight from Epic paper for Siggraph 2013 Shading course\n// http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_slides.pdf\n\nvec3 ImportanceSampleGGX( vec2 Xi, float Roughness4, vec3 N ) {\n\tfloat Phi = 2.0 * PI * Xi.x;\n\tfloat CosTheta = sqrt( (1.0 - Xi.y) / ( 1.0 + (Roughness4 - 1.0) * Xi.y ) );\n\tfloat SinTheta = sqrt( 1.0 - CosTheta * CosTheta );\n\t\n\tvec3 H;\n\tH.x = SinTheta * cos( Phi );\n\tH.y = SinTheta * sin( Phi );\n\tH.z = CosTheta;\n\t\n\tvec3 UpVector = abs( N.z ) < 0.999 ? vec3(0,0,1) : vec3(1,0,0);\n\tvec3 TangentX = normalize( cross( UpVector, N ) );\n\tvec3 TangentY = cross( N, TangentX );\n\t\n\t// Tangent to world space\n\treturn TangentX * H.x + TangentY * H.y + N * H.z;\n}\n\n\n// http://the-witness.net/news/2012/02/seamless-cube-map-filtering/\nvec3 fix_cube_lookup( vec3 v, float cube_size, float lod ) {\n\tfloat M = max(max(abs(v.x), abs(v.y)), abs(v.z));\n\tfloat scale = 1.0 - exp2(lod) / cube_size;\n\tif (abs(v.x) != M) v.x *= scale;\n\tif (abs(v.y) != M) v.y *= scale;\n\tif (abs(v.z) != M) v.z *= scale;\n\treturn v;\n}\n\nvec2 envMapEquirect(vec3 wcNormal, float flipEnvMap) {\n  //I assume envMap texture has been flipped the WebGL way (pixel 0,0 is a the bottom)\n  //therefore we flip wcNorma.y as acos(1) = 0\n  float phi = acos(-wcNormal.y);\n  float theta = atan(flipEnvMap * wcNormal.x, wcNormal.z) + PI;\n  return vec2(theta / TwoPI, phi / PI);\n}\n\nvec2 envMapEquirect(vec3 wcNormal) {\n    //-1.0 for left handed coordinate system oriented texture (usual case)\n    return envMapEquirect(wcNormal, -1.0);\n}\n\n\nvec3 getTextureLod(sampler2D texture, vec3 N) {\n\tvec2 newUV = envMapEquirect(N);\n\tnewUV.x -= .25;\n\tnewUV.x = mod(newUV.x, 1.0);\n\tnewUV.x = 1.0 - newUV.x;\n\treturn texture2D(texture, newUV).rgb;\n}\n\n\n\nvec3 PrefilterEnvMap( float roughness, vec3 R )\n{\n\tvec3 N                = R;\n\tvec3 V                = R;\n\t\n\tvec3 prefilteredColor = vec3(0.0);\n\tfloat totalWeight     = 0.0;\n\t\n\t// int numSamples = 8192 / int( uMaxLod - uLod );\n\tfor(int i=0; i<numSamples; ++i)\n\t{\n\t\tvec2 xi  = Hammersley(i, numSamples);\n\t\tvec3 H   = ImportanceSampleGGX(xi, roughness, N);\n\t\tvec3 L   = 2.0 * dot(V, H) * H - V;\n\t\tfloat  NoL = saturate(dot(N, L));\n\t\tNoL = 1.0;\n\n\t\tif(NoL>0.0)\n\t\t{\n\t\t\tvec3 lookup = fix_cube_lookup( L, uSize, uLod );\n\t\t\t// prefilteredColor += getTextureLod( texture, L) * NoL;\n\t\t\tprefilteredColor += getTextureLod( texture, lookup) * NoL;\n\t\t\ttotalWeight += NoL;\n\t\t}\n\t}\n\t\n\treturn prefilteredColor / totalWeight;\n}\n\n\nvoid main(void) {\n\tvec3 color      = texture2D( texture, vTextureCoord ).rgb;\n\tfloat roughness = uLod / uMaxLod;\n\tvec3 N          = texture2D( textureNormal, vTextureCoord).rgb * 2.0 - 1.0;\n\tcolor           = PrefilterEnvMap( pow( roughness, 6.0 ), N );\n\t\n\tgl_FragColor    = vec4(color, 1.0);\n}";
 	var numSamples = Math.floor(8192 / Math.floor( 6 - Math.floor(lod) )*1.00);
 	fs = fs.replace('{{NUM_SAMPLES}}', numSamples);
 
@@ -4518,12 +4551,53 @@ p.render = function(texture, textureNormal) {
 
 module.exports = ViewPrefilteredEnvMap;
 },{}],6:[function(require,module,exports){
+// ViewSphere.js
+
+
+var GL = bongiovi.GL;
+var gl;
+
+
+function ViewSphere() {
+	bongiovi.View.call(this, "#define GLSLIFY 1\n// sphere.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\n\nvoid main(void) {\n    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n    vNormal = normalize(aVertexPosition);\n}", "#define GLSLIFY 1\n// sphere.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nuniform sampler2D texture0;\nuniform sampler2D texture1;\nuniform sampler2D texture2;\nuniform sampler2D texture3;\nuniform sampler2D texture4;\nuniform sampler2D texture5;\nuniform sampler2D texture6;\n\nuniform float roughness;\n\n\nvoid main(void) {\n\tfloat gap = 1.0 / 6.0;\n\tfloat p = 0.0;\n\n\tvec4 color0;\n\tvec4 color1;\n\n\tif(roughness < gap) {\n\t\tp = roughness / gap;\n\t\tcolor0 = texture2D(texture0, vTextureCoord);\n\t\tcolor1 = texture2D(texture1, vTextureCoord);\n\t} else if(roughness < gap * 2.0) {\n\t\tp = (roughness - gap) / gap;\n\t\tcolor0 = texture2D(texture1, vTextureCoord);\n\t\tcolor1 = texture2D(texture2, vTextureCoord);\n\t} else if(roughness < gap * 3.0) {\n\t\tp = (roughness - gap * 2.0) / gap;\n\t\tcolor0 = texture2D(texture2, vTextureCoord);\n\t\tcolor1 = texture2D(texture3, vTextureCoord);\n\t} else if(roughness < gap * 4.0) {\n\t\tp = (roughness - gap * 3.0) / gap;\n\t\tcolor0 = texture2D(texture3, vTextureCoord);\n\t\tcolor1 = texture2D(texture4, vTextureCoord);\n\t} else if(roughness < gap * 5.0) {\n\t\tp = (roughness - gap * 4.0) / gap;\n\t\tcolor0 = texture2D(texture4, vTextureCoord);\n\t\tcolor1 = texture2D(texture5, vTextureCoord);\n\t} else {\n\t\tp = (roughness - gap * 5.0) / gap;\n\t\tcolor0 = texture2D(texture5, vTextureCoord);\n\t\tcolor1 = texture2D(texture6, vTextureCoord);\n\t} \n\n    gl_FragColor = mix(color0, color1, p);\n    // gl_FragColor.rgb = vNormal * .5 + .5;\n}");
+}
+
+var p = ViewSphere.prototype = new bongiovi.View();
+p.constructor = ViewSphere;
+
+
+p._init = function() {
+	gl = GL.gl;
+	this.mesh = bongiovi.MeshUtils.createSphere(100, 50);
+};
+
+p.render = function(texture, fbos) {
+	this.shader.bind();
+	this.shader.uniform("texture0", "uniform1i", 0);
+	texture.bind(0);
+
+	for(var i=0; i<fbos.length; i++) {
+		var index = i + 1;
+		var t = fbos[i].getTexture();
+		this.shader.uniform("texture"+index, "uniform1i", index);
+		t.bind(index);
+	}
+
+	var roughness = params.roughness;
+	// roughness = Math.pow(roughness*roughness, 4.0);
+	this.shader.uniform("roughness", "uniform1f", roughness);
+	GL.draw(this.mesh);
+};
+
+module.exports = ViewSphere;
+},{}],7:[function(require,module,exports){
 // app.js
 window.bongiovi = require("./libs/bongiovi.js");
 var dat = require("dat-gui");
 
 window.params = {
-	lod:3
+	lod:3,
+	roughness:0
 };
 
 (function() {
@@ -4533,9 +4607,6 @@ window.params = {
 		var l = new bongiovi.SimpleImageLoader();
 		var a = ["assets/sphereNormal.png", "assets/uffizi.jpg"];
 		l.load(a, this, this._onImageLoaded);
-
-		var numSamples = Math.floor(8192 / Math.floor( 6 - Math.floor(params.lod) )*1.00);
-		console.log(numSamples);
 	}
 
 	var p = App.prototype;
@@ -4561,19 +4632,20 @@ window.params = {
 
 		this._scene = new SceneApp();
 		bongiovi.Scheduler.addEF(this, this._loop);
-
-		this._scene.loop();
+		
+		this.gui = new dat.GUI();
+		this.gui.add(params, 'roughness', 0, 1);
 	};
 
 	p._loop = function() {
-		// this._scene.loop();
+		this._scene.loop();
 	};
 
 })();
 
 
 new App();
-},{"./SceneApp":4,"./libs/bongiovi.js":7,"dat-gui":1}],7:[function(require,module,exports){
+},{"./SceneApp":4,"./libs/bongiovi.js":8,"dat-gui":1}],8:[function(require,module,exports){
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.bongiovi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 "use strict";
@@ -19241,4 +19313,4 @@ module.exports = ViewDotPlanes;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[6]);
+},{}]},{},[7]);

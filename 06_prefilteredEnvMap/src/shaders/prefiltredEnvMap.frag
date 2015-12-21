@@ -11,11 +11,14 @@ uniform float		uSize;
 // uniform int			numSamples;
 
 
-// const int numSamples = 2730;
+
+const float PI = 3.1415926535897932384626433832795;
+const float TwoPI = PI * 2.0; 
+
 const int numSamples = {{NUM_SAMPLES}};
 #define saturate(x) clamp(x, 0.0, 1.0)
-#define PI 3.1415926535897932384626433832795
-#define TwoPI 3.1415926535897932384626433832795*2.0
+
+// #define TwoPI 3.1415926535897932384626433832795*2.0
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -34,6 +37,7 @@ vec2 Hammersley(int index, int numSamples ){
 	// return vec2(fract(float(index) / numSamples), float(reversedIndex) * 2.3283064365386963e-10);
 	// return vec2(fract(float(index) / float(numSamples)), 1.0);
 	return vec2(rand(vec2(float(index), float(numSamples))), rand(vec2(float(numSamples), float(index))));
+	// return vec2(fract(float(index) / float(numSamples)), rand(vec2(float(numSamples), float(index))));
 }
 
 // straight from Epic paper for Siggraph 2013 Shading course
@@ -84,6 +88,9 @@ vec2 envMapEquirect(vec3 wcNormal) {
 
 vec3 getTextureLod(sampler2D texture, vec3 N) {
 	vec2 newUV = envMapEquirect(N);
+	newUV.x -= .25;
+	newUV.x = mod(newUV.x, 1.0);
+	newUV.x = 1.0 - newUV.x;
 	return texture2D(texture, newUV).rgb;
 }
 
@@ -91,11 +98,11 @@ vec3 getTextureLod(sampler2D texture, vec3 N) {
 
 vec3 PrefilterEnvMap( float roughness, vec3 R )
 {
-	vec3 N = R;
-	vec3 V = R;
+	vec3 N                = R;
+	vec3 V                = R;
 	
 	vec3 prefilteredColor = vec3(0.0);
-	float  totalWeight      = 0.0;
+	float totalWeight     = 0.0;
 	
 	// int numSamples = 8192 / int( uMaxLod - uLod );
 	for(int i=0; i<numSamples; ++i)
@@ -110,7 +117,7 @@ vec3 PrefilterEnvMap( float roughness, vec3 R )
 		{
 			vec3 lookup = fix_cube_lookup( L, uSize, uLod );
 			// prefilteredColor += getTextureLod( texture, L) * NoL;
-			prefilteredColor += getTextureLod( texture, L) * NoL;
+			prefilteredColor += getTextureLod( texture, lookup) * NoL;
 			totalWeight += NoL;
 		}
 	}

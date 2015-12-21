@@ -3,7 +3,8 @@ window.bongiovi = require("./libs/bongiovi.js");
 var dat = require("dat-gui");
 
 window.params = {
-	lod:3
+	lod:3,
+	roughness:0
 };
 
 (function() {
@@ -13,9 +14,6 @@ window.params = {
 		var l = new bongiovi.SimpleImageLoader();
 		var a = ["assets/sphereNormal.png", "assets/uffizi.jpg"];
 		l.load(a, this, this._onImageLoaded);
-
-		var numSamples = Math.floor(8192 / Math.floor( 6 - Math.floor(params.lod) )*1.00);
-		console.log(numSamples);
 	}
 
 	var p = App.prototype;
@@ -41,12 +39,13 @@ window.params = {
 
 		this._scene = new SceneApp();
 		bongiovi.Scheduler.addEF(this, this._loop);
-
-		this._scene.loop();
+		
+		this.gui = new dat.GUI();
+		this.gui.add(params, 'roughness', 0, 1);
 	};
 
 	p._loop = function() {
-		// this._scene.loop();
+		this._scene.loop();
 	};
 
 })();
