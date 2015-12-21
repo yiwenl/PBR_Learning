@@ -7,22 +7,16 @@ var dat = require("dat-gui");
 
 	App = function() {
 
-		var loader = new bongiovi.SimpleImageLoader();
-		loader.load([
-			"assets/negx.jpg",
-			"assets/negy.jpg",
-			"assets/negz.jpg",
-			"assets/posx.jpg",
-			"assets/posy.jpg",
-			"assets/posz.jpg"
-			], this, this._onImageLoaded);
+		var a =["assets/uffizi.jpg"];
+		var l = new bongiovi.SimpleImageLoader();
+		l.load(a, this, this._onImageLoaded);
+		
 	}
 
 	var p = App.prototype;
 
 	p._onImageLoaded = function(img) {
 		window.images = img;
-
 		if(document.body) this._init();
 		else {
 			window.addEventListener("load", this._init.bind(this));
@@ -36,10 +30,6 @@ var dat = require("dat-gui");
 		this.canvas.className = "Main-Canvas";
 		document.body.appendChild(this.canvas);
 		bongiovi.GL.init(this.canvas);
-
-		var gl = bongiovi.GL.gl;
-		gl.getExtension("EXT_shader_texture_lod");
-		console.log(gl.getExtension("EXT_shader_texture_lod"));
 
 		this._scene = new SceneApp();
 		bongiovi.Scheduler.addEF(this, this._loop);
