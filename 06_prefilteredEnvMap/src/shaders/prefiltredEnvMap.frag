@@ -11,7 +11,8 @@ uniform float		uSize;
 // uniform int			numSamples;
 
 
-const int numSamples = 2730;
+// const int numSamples = 2730;
+const int numSamples = {{NUM_SAMPLES}};
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.1415926535897932384626433832795
 #define TwoPI 3.1415926535897932384626433832795*2.0

@@ -26,22 +26,27 @@ p._initViews = function() {
 	this._vDotPlane = new bongiovi.ViewDotPlane();
 
 	this._vCopy = new bongiovi.ViewCopy();
-	this._vFilterEnvMap = new ViewPrefilteredEnvMap();
+	// this._vFilterEnvMap = new ViewPrefilteredEnvMap();
+
+	this._envMaps = [];
+	for(var i=0; i<6; i++) {
+		var v = new ViewPrefilteredEnvMap(i);
+		this._envMaps.push(v);
+	}
 };
 
 p.render = function() {
 	GL.setMatrices(this.cameraOrtho);
 	GL.rotate(this.rotationFront);
 
-	var size = window.innerWidth/2;
-	GL.setViewport(0, 0, size, size/2);
-	this._vCopy.render(this.textureMap);
-	GL.setViewport(0, size/2, size, size/2);
-	this._vCopy.render(this.textureNormal);
+	var h = window.innerHeight / 6;
+	var w = Math.min(h*2, window.innerHeight);
 
-	var W = window.innerWidth;
-	GL.setViewport(0, window.innerHeight - W/2, W, W/2);
-	this._vFilterEnvMap.render(this.textureMap, this.textureNormal);
+	for(var i=0; i<this._envMaps.length; i++) {
+		GL.setViewport(0, h*i, w, h);
+		var v = this._envMaps[i];
+		v.render(this.textureMap, this.textureNormal);
+	}
 
 };
 

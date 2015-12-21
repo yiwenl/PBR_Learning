@@ -4,8 +4,14 @@ var GL = bongiovi.GL;
 var gl;
 var glslify = require("glslify");
 
-function ViewPrefilteredEnvMap() {
-	bongiovi.View.call(this, null, glslify('../shaders/prefiltredEnvMap.frag'));
+function ViewPrefilteredEnvMap(lod) {
+	lod = lod == undefined ? 5 : lod;
+	this._lod = lod;
+	var fs = glslify('../shaders/prefiltredEnvMap.frag');
+	var numSamples = Math.floor(8192 / Math.floor( 6 - Math.floor(lod) )*1.00);
+	fs = fs.replace('{{NUM_SAMPLES}}', numSamples);
+
+	bongiovi.View.call(this, null, fs);
 }
 
 var p = ViewPrefilteredEnvMap.prototype = new bongiovi.View();
@@ -24,12 +30,9 @@ p.render = function(texture, textureNormal) {
 	this.shader.uniform("textureNormal", "uniform1i", 1);
 	textureNormal.bind(1);
 
-	this.shader.uniform("uLod", "uniform1f", Math.floor(params.lod));
+	this.shader.uniform("uLod", "uniform1f", this._lod);
 	this.shader.uniform("uMaxLod", "uniform1f", 6);
 	this.shader.uniform("uSize", "uniform1f", 1024);
-
-	var numSamples = Math.floor(8192 / Math.floor( 6 - Math.floor(params.lod) ));
-	this.shader.uniform("numSamples", "uniform1i", numSamples);
 	GL.draw(this.mesh);
 };
 

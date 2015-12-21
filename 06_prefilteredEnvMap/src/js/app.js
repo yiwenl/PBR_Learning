@@ -42,9 +42,6 @@ window.params = {
 		this._scene = new SceneApp();
 		bongiovi.Scheduler.addEF(this, this._loop);
 
-		this.gui = new dat.GUI({width:300});
-		this.gui.add(params, 'lod', 1, 6).step(1);
-
 		this._scene.loop();
 	};
 
