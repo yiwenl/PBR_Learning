@@ -4488,7 +4488,15 @@ p.render = function(textureEnv, textureRad) {
 	this.shader.uniform("textureRad", "uniform1i", 1);
 	textureRad.bind(1);
 
-
+	this.shader.uniform("uBaseColor", "uniform3fv", params.baseColor);
+	this.shader.uniform("uExposure", "uniform1f", params.exposure);
+	this.shader.uniform("uGamma", "uniform1f", params.gamma);
+	this.shader.uniform("uSpecular", "uniform1f", params.specular);
+	this.shader.uniform("uMetallic", "uniform1f", params.metallic);
+	this.shader.uniform("uRoughness", "uniform1f", params.roughness);
+	var roughness = params.roughness;
+	roughness = Math.pow(roughness * roughness, 4.0);
+	this.shader.uniform("uRoughness4", "uniform1f", roughness);
 	// console.log(GL.matrix, GL.camera.projection);
 	// this.shader.uniform("uViewMatrix", "uniformMatrix4fv", GL.matrix);
 	// this.shader.uniform("uProjectionMatrix", "uniformMatrix4fv", GL.camera.projection);
@@ -4500,6 +4508,15 @@ module.exports = ViewSphere;
 // app.js
 window.bongiovi = require("./libs/bongiovi.js");
 var dat = require("dat-gui");
+
+window.params = {
+	gamma:2.2,
+	exposure:4.0,
+	baseColor:[1, 1, 1],
+	roughness:1.0,
+	metallic:1.0,
+	specular:1.0
+};
 
 (function() {
 	var SceneApp = require("./SceneApp");
@@ -4535,7 +4552,10 @@ var dat = require("dat-gui");
 		this._scene = new SceneApp();
 		bongiovi.Scheduler.addEF(this, this._loop);
 
-		// this.gui = new dat.GUI({width:300});
+		this.gui = new dat.GUI({width:300});
+		this.gui.add(params, 'roughness', 0, 1);
+		this.gui.add(params, 'metallic', 0, 1);
+		this.gui.add(params, 'specular', 0, 1);
 	};
 
 	p._loop = function() {
