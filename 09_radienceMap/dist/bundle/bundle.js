@@ -4421,18 +4421,13 @@ dat.utils.common);
 },{}],4:[function(require,module,exports){
 // SceneApp.js
 
-var GL       = bongiovi.GL, gl;
-var ViewBox  = require("./ViewBox");
-var ViewBall = require("./ViewBall");
+var GL = bongiovi.GL, gl;
+var ViewSphere = require("./ViewSphere");
 
 function SceneApp() {
 	gl = GL.gl;
-	console.log( gl.getExtension("EXT_shader_texture_lod") );
-	console.log( gl.getExtension("GL_EXT_shader_texture_lod") );
-	this.count = 0;
 	bongiovi.Scene.call(this);
-	this.sceneRotation.lock(true);
-	this.camera.lockRotation(false);
+
 	window.addEventListener("resize", this.resize.bind(this));
 }
 
@@ -4441,48 +4436,23 @@ var p = SceneApp.prototype = new bongiovi.Scene();
 
 p._initTextures = function() {
 	console.log('Init Textures');
-	var faces = [images.posx, images.negx, images.posy, images.negy, images.posz, images.negz];
-	var o = {
-		magFilter:gl.LINEAR_MIPMAP_NEAREST,
-		minFilter:gl.LINEAR_MIPMAP_NEAREST
-	}
-	console.log(o);
-	this.cubeTexture = new bongiovi.GLCubeTexture(faces, o);
+	this.textureMap = new bongiovi.GLTexture(images.envMap);
+	this.textureRad = new bongiovi.GLTexture(images.radienceMap);
 };
 
 p._initViews = function() {
 	console.log('Init Views');
 	this._vAxis = new bongiovi.ViewAxis();
 	this._vDotPlane = new bongiovi.ViewDotPlane();
-	this._vCube = new ViewBox();
-	this._vBall = new ViewBall();
+
+	this._vSphere = new ViewSphere();
 };
 
 p.render = function() {
-	this.count += .01;
 	this._vAxis.render();
 	this._vDotPlane.render();
 
-	var num = 9;
-	var gap = 50;
-	var roughness = 0.0;
-	var metallic = 0.0;
-	var pos = [0, 0, 0];
-	var l = 100.0;
-	var r = 300.0;
-	var lightPosition = [Math.cos(this.count) * r, l, Math.sin(this.count) * r];
-	for(var j=0; j<=num; j++) {
-		metallic = j/num;
-		pos[2] = -gap*num/2 + j*gap;
-		for(var i=0; i<=num; i++) {
-			roughness = i/num;
-			pos[0] = -gap*num/2 + i*gap;
-			// console.log(roughness, metallic);
-			this._vBall.render(pos, lightPosition, roughness, metallic, this.cubeTexture);
-		}
-	}
-
-	this._vCube.render(this.cubeTexture);
+	this._vSphere.render(this.textureMap, this.textureRad);
 };
 
 p.resize = function() {
@@ -4491,90 +4461,42 @@ p.resize = function() {
 };
 
 module.exports = SceneApp;
-},{"./ViewBall":5,"./ViewBox":6}],5:[function(require,module,exports){
-// ViewBall.js
+},{"./ViewSphere":5}],5:[function(require,module,exports){
+// ViewSphere.js
 
 var GL = bongiovi.GL;
 var gl;
 
 
-function ViewBall() {
-	bongiovi.View.call(this, "#define GLSLIFY 1\n// ball.vert\n\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\nuniform vec3 position;\nuniform vec3 lightPosition;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\nvarying vec3 vEye;\n\n\n\nvoid main(void) {\n\tvec3 pos    = aVertexPosition + position;\n\tvec4 mvPos  = uMVMatrix * vec4(pos, 1.0);\n\tgl_Position = uPMatrix * mvPos;\n\n\tvTextureCoord  = aTextureCoord;\n\tvPosition      = pos;\n\tvNormalOrg     = normalize(aVertexPosition);\n\tvNormal        = normalMatrix * vNormalOrg;\n\tvLightPosition = lightPosition;\n\tvEye \t\t   = normalize(mvPos.rgb);\n}", "// ball.frag\n#extension GL_EXT_shader_texture_lod : enable\n#define GLSLIFY 1\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform samplerCube texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vNormalOrg;\nvarying vec3 vPosition;\nvarying vec3 vLightPosition;\nvarying vec3 vEye;\n\nuniform mat3 invertMVMatrix;\nuniform vec3 cameraPosition;\nuniform vec3 baseColor;\nuniform float roughness;\nuniform float metallic;\nuniform float specular;\nuniform float exposure;\nuniform float gamma;\n\n#define saturate(x) clamp(x, 0.0, 1.0)\n#define PI 3.14159265359\n\nvec3 Diffuse(vec3 pAlbedo)\n{\n    return pAlbedo/PI;\n}\n//-------------------------- Normal distribution functions --------------------------------------------\nfloat NormalDistribution_GGX(float a, float NdH)\n{\n    // Isotropic ggx.\n    float a2 = a*a;\n    float NdH2 = NdH * NdH;\n\n    float denominator = NdH2 * (a2 - 1.0) + 1.0;\n    denominator *= denominator;\n    denominator *= PI;\n\n    return a2 / denominator;\n}\n\n//-------------------------- Geometric shadowing -------------------------------------------\nfloat Geometric_Smith_Schlick_GGX(float a, float NdV, float NdL)\n{\n        // Smith schlick-GGX.\n    float k = a * 0.5;\n    float GV = NdV / (NdV * (1.0 - k) + k);\n    float GL = NdL / (NdL * (1.0 - k) + k);\n\n    return GV * GL;\n}\n\n//-------------------------- Fresnel ------------------------------------\nvec3 Fresnel_Schlick(vec3 specularColor, vec3 h, vec3 v)\n{\n    return (specularColor + (1.0 - specularColor) * pow((1.0 - clamp(dot(v, h), 0.0, 1.0)), 5.0));\n}\n\n//-------------------------- BRDF terms ------------------------------------\nfloat Specular_D(float a, float NdH)\n{\n\treturn NormalDistribution_GGX(a, NdH);\n}\n\nvec3 Specular_F(vec3 specularColor, vec3 h, vec3 v)\n{\n\t return Fresnel_Schlick(specularColor, h, v);\n}\n\nvec3 Specular_F_Roughness(vec3 specularColor, float a, vec3 h, vec3 v)\n{\n\treturn (specularColor + (max(vec3(1.0 - a), specularColor) - specularColor) * pow((1.0 - clamp(dot(v, h), 0.0, 1.0)), 5.0));\n}\n\nfloat Specular_G(float a, float NdV, float NdL, float NdH, float VdH, float LdV)\n{\n\treturn Geometric_Smith_Schlick_GGX(a, NdV, NdL);\n}\n\nvec3 Specular(vec3 specularColor, vec3 h, vec3 v, vec3 l, float a, float NdL, float NdV, float NdH, float VdH, float LdV)\n{\n    return ((Specular_D(a, NdH) * Specular_G(a, NdV, NdL, NdH, VdH, LdV)) * Specular_F(specularColor, v, h) ) / (4.0 * NdL * NdV + 0.0001);\n}\n\nvec3 ComputeLight(vec3 albedoColor,vec3 specularColor, vec3 normal, vec3 lightPosition, vec3 lightColor, vec3 lightDir, vec3 viewDir)\n{\n    // Compute some useful values.\n\tfloat NdL  = clamp(dot(normal, lightDir), 0.0, 1.0);\n\tfloat NdV  = clamp(dot(normal, viewDir), 0.0, 1.0);\n\tvec3 h     = normalize(lightDir + viewDir);\n\tfloat NdH  = clamp(dot(normal, h), 0.0, 1.0);\n\tfloat VdH  = clamp(dot(viewDir, h), 0.0, 1.0);\n\tfloat LdV  = clamp(dot(lightDir, viewDir), 0.0, 1.0);\n\tfloat a    = max(0.001, roughness * roughness);\n\t\n\tvec3 cDiff = Diffuse(albedoColor);\n\tvec3 cSpec = Specular(specularColor, h, viewDir, lightDir, a, NdL, NdV, NdH, VdH, LdV);\n\n    return lightColor * NdL * (cDiff * (1.0 - cSpec) + cSpec);\n}\n\n// Ok, this is ugly, but there is an explanation ...\n// WebGL need the extension EXT_shader_texture_lod in order to use textureCubeLod, and it's not yet implemented.\n// With textureCube the mipmap is automatically applied, and you can only add a bias.\n// To avoid that I saved each mip level in a separate cubemap.\n// If there is a less awfull way to do this I'd be happy to know !\nvec3 ComputeEnvColor(float roughness, vec3 reflectionVector)\n{\t\n\t// float r = pow(roughness * roughness, 4.0);\n\tfloat a = roughness * roughness * 6.0;\n\treturn textureCubeLodEXT(texture, reflectionVector, a).rgb;\n}\n\nvoid main(void) {\n\tvec3 normal            = vNormalOrg;\n\t\n\tvec3 viewDir           = normalize(cameraPosition - vPosition);\n\tvec3 albedoCorrected   = pow(abs(baseColor.rgb), vec3(2.2));\n\t\n\tvec3 realAlbedo        = baseColor - baseColor * metallic;\n\tvec3 realSpecularColor = mix(vec3(0.03, 0.03, 0.03), baseColor, metallic);\n\t\n\tvec3 vLightVector      = normalize(vLightPosition);\n\tvec3 light1            = ComputeLight( realAlbedo, realSpecularColor, normal, vLightPosition, vec3(0.4, 0.42, 0.37), vLightVector, viewDir);\n\t\n\tvec3 reflectVector     = invertMVMatrix*reflect(vEye, vNormal);\n\tvec3 envColor          = ComputeEnvColor(roughness, reflectVector);\n\t\n\tvec3 envFresnel        = Specular_F_Roughness(realSpecularColor, roughness * roughness, normal, viewDir);\n\n    // gl_FragColor = vec4(envColor, 1.0);\n    const float lightIntensity = 1.0;\n    gl_FragColor = vec4(vec3(lightIntensity) * light1 + 1.0 * envFresnel * envColor + realAlbedo * 0.01, 1.0);\n}");
+function ViewSphere() {
+	bongiovi.View.call(this, "#define GLSLIFY 1\n// sphere.vert\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 invertMVMatrix;\nuniform mat3 normalMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsNormal;\nvarying vec3 vEyePosition;\nvarying vec3 vWsPosition;\n\nvoid main(void) {\n\tvec4 worldSpacePosition = vec4(aVertexPosition, 1.0);\n\tvec4 viewSpacePosition  = uMVMatrix * worldSpacePosition;\n\t\n\t\n\tvNormal                 = normalMatrix * normalize(aVertexPosition);\n\tvPosition               = viewSpacePosition.xyz;\n\tvWsPosition             = worldSpacePosition.xyz;\n\t\n\tvec4 eyeDirViewSpace    = viewSpacePosition - vec4( 0.0, 0.0, 0.0, 1.0 );\n\tvEyePosition            = -( invertMVMatrix * eyeDirViewSpace.rgb );\n\tvWsNormal               = ( invertMVMatrix * vec4( vNormal, 0.0 ).rgb );\n\t\n\tgl_Position             = uPMatrix * viewSpacePosition;\n\tvTextureCoord           = aTextureCoord;\n}", "#define GLSLIFY 1\n// sphere.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nuniform sampler2D texture;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vPosition;\nvarying vec3 vWsNormal;\nvarying vec3 vEyePosition;\nvarying vec3 vWsPosition;\n\n\n\nvoid main(void) {\n    gl_FragColor = vec4(vNormal * .5 + .5, 1.0);\n}");
 }
 
-var p = ViewBall.prototype = new bongiovi.View();
-p.constructor = ViewBall;
+var p = ViewSphere.prototype = new bongiovi.View();
+p.constructor = ViewSphere;
 
 
 p._init = function() {
 	gl = GL.gl;
-	var positions = [];
-	var coords = [];
-	var indices = []; 
-
-	this.mesh = bongiovi.MeshUtils.createSphere(20, 50);
+	this.mesh = bongiovi.MeshUtils.createSphere(100, 50);
 };
 
-p.render = function(pos, lightPos, roughness, metallic, texture) {
+p.render = function(textureEnv, textureRad) {
 	this.shader.bind();
-	// this.shader.uniform("texture", "uniform1i", 0);
-	// texture.bind(0);
-	var specular = 1.0;
-	var exposure = 1.5;
-	var gamma    = 2.2;
+	this.shader.uniform("textureEnv", "uniform1i", 0);
+	textureEnv.bind(0);
+	this.shader.uniform("textureRad", "uniform1i", 1);
+	textureRad.bind(1);
 
-	this.shader.uniform("cameraPosition", "uniform3fv", GL.camera.position);
-	this.shader.uniform("lightPosition", "uniform3fv", lightPos || [0, 0, 0]);
-	this.shader.uniform("position", "uniform3fv", pos || [0, 0, 0]);
-	this.shader.uniform("baseColor", "uniform3fv", [1, 1, 1]);
-	// this.shader.uniform("roughness", "uniform1f", Math.pow(roughness * roughness, 4.0)  );
-	this.shader.uniform("roughness", "uniform1f", roughness);
-	this.shader.uniform("metallic", "uniform1f", metallic);
-	this.shader.uniform("specular", "uniform1f", specular);
-	this.shader.uniform("exposure", "uniform1f", exposure);
-	this.shader.uniform("gamma", "uniform1f", gamma);
-	this.shader.uniform("texture", "uniform1i", 0);
-	texture.bind(0);
+
+	// console.log(GL.matrix, GL.camera.projection);
+	// this.shader.uniform("uViewMatrix", "uniformMatrix4fv", GL.matrix);
+	// this.shader.uniform("uProjectionMatrix", "uniformMatrix4fv", GL.camera.projection);
 	GL.draw(this.mesh);
 };
 
-module.exports = ViewBall;
+module.exports = ViewSphere;
 },{}],6:[function(require,module,exports){
-// ViewBox.js
-
-var GL = bongiovi.GL;
-var gl;
-
-
-function ViewBox() {
-	// bongiovi.View.call(this, bongiovi.ShaderLibs.get('generalWithNormalVert'), bongiovi.ShaderLibs.get('simpleColorLighting'));
-	bongiovi.View.call(this, "#define GLSLIFY 1\n// cubemap.vert\n#define SHADER_NAME BASIC_VERTEX\n\nprecision highp float;\nattribute vec3 aVertexPosition;\nattribute vec3 aNormal;\nattribute vec2 aTextureCoord;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat3 normalMatrix;\n\nvarying vec2 vTextureCoord;\nvarying vec3 vNormal;\nvarying vec3 vEye;\nvarying vec3 vVertex;\n\nvoid main(void) {\n\tvec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);\n    gl_Position = uPMatrix * mvPosition;\n    vTextureCoord = aTextureCoord;\n    vNormal = normalMatrix * aNormal;\n    vEye = normalize(mvPosition).rgb;\n    vVertex = aVertexPosition;\n}", "#define GLSLIFY 1\n// cubemap.frag\n\n#define SHADER_NAME SIMPLE_TEXTURE\n\nprecision highp float;\nvarying vec2 vTextureCoord;\nuniform samplerCube texture;\nuniform vec3 camera;\nvarying vec3 vNormal;\nvarying vec3 vEye;\nvarying vec3 vVertex;\n\nvoid main(void) {\n    gl_FragColor = textureCube(texture, vVertex);\n    // gl_FragColor = textureCube(texture, reflect(vEye, vNormal));\n    // gl_FragColor = textureCube(texture, refract(vEye, vNormal, 1.0));\n    // gl_FragColor = vec4(1.0);\n    // gl_FragColor.rgb = vNormal*.5+.5;\n}");
-	// bongiovi.View.call(this, null, bongiovi.ShaderLibs.get('simpleColorFrag'));
-}
-
-var p = ViewBox.prototype = new bongiovi.View();
-p.constructor = ViewBox;
-
-
-p._init = function() {
-	var size = 500;
-	// this.mesh = bongiovi.MeshUtils.createCube(size, size, size, true);
-	this.mesh = bongiovi.MeshUtils.createSkyBox(size, true);
-};
-
-p.render = function(texture) {
-	this.shader.bind();
-
-	this.shader.uniform("texture", "uniform1i", 0);
-	texture.bind(0);
-
-	this.shader.uniform("camera", "uniform3fv", GL.camera.position);
-
-	GL.draw(this.mesh);
-};
-
-module.exports = ViewBox;
-},{}],7:[function(require,module,exports){
 // app.js
 window.bongiovi = require("./libs/bongiovi.js");
 var dat = require("dat-gui");
@@ -4584,22 +4506,18 @@ var dat = require("dat-gui");
 
 	App = function() {
 
-		var loader = new bongiovi.SimpleImageLoader();
-		loader.load([
-			"assets/negx.jpg",
-			"assets/negy.jpg",
-			"assets/negz.jpg",
-			"assets/posx.jpg",
-			"assets/posy.jpg",
-			"assets/posz.jpg"
-			], this, this._onImageLoaded);
+		var l = new bongiovi.SimpleImageLoader();
+		var a = ["assets/radienceMap.jpg", "assets/envMap.jpg"];
+		l.load(a, this, this._onImageLoaded);
+
+		
 	}
 
 	var p = App.prototype;
 
-	p._onImageLoaded = function(img) {
-		window.images = img;
-
+	p._onImageLoaded = function(imgs) {
+		console.log(imgs);
+		window.images = imgs;
 		if(document.body) this._init();
 		else {
 			window.addEventListener("load", this._init.bind(this));
@@ -4613,10 +4531,6 @@ var dat = require("dat-gui");
 		this.canvas.className = "Main-Canvas";
 		document.body.appendChild(this.canvas);
 		bongiovi.GL.init(this.canvas);
-
-		var gl = bongiovi.GL.gl;
-		gl.getExtension("EXT_shader_texture_lod");
-		console.log(gl.getExtension("EXT_shader_texture_lod"));
 
 		this._scene = new SceneApp();
 		bongiovi.Scheduler.addEF(this, this._loop);
@@ -4632,7 +4546,7 @@ var dat = require("dat-gui");
 
 
 new App();
-},{"./SceneApp":4,"./libs/bongiovi.js":8,"dat-gui":1}],8:[function(require,module,exports){
+},{"./SceneApp":4,"./libs/bongiovi.js":7,"dat-gui":1}],7:[function(require,module,exports){
 (function (global){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.bongiovi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 /**
@@ -11788,21 +11702,45 @@ p.init = function(mCanvas, mWidth, mHeight, parameters) {
 	this.gl.clearColor( 0, 0, 0, 1 );
 	this.gl.clearDepth( 1 );
 
-	this.matrix                 = glm.mat4.create();
+	this.matrix                    = glm.mat4.create();
 	glm.mat4.identity(this.matrix);
-	this.normalMatrix           = glm.mat3.create();
-	this.invertMVMatrix         = glm.mat3.create();
-	this.textureLodExt        	= this.gl.getExtension("EXT_shader_texture_lod");
-	this.glTextureLodExt        = this.gl.getExtension("GL_EXT_shader_texture_lod");
-	this.depthTextureExt        = this.gl.getExtension("EXT_sRGB"); // Or browser-appropriate prefix
-	this.depthTextureExt        = this.gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-	this.floatTextureExt        = this.gl.getExtension("OES_texture_float"); // Or browser-appropriate prefix
-	this.floatTextureLinearExt  = this.gl.getExtension("OES_texture_float_linear"); // Or browser-appropriate prefix
-	this.standardDerivativesExt = this.gl.getExtension("OES_standard_derivatives"); // Or browser-appropriate prefix
+	this.normalMatrix              = glm.mat3.create();
+	this.invertMVMatrix            = glm.mat3.create();
+	/*
+	this.textureLodExt             = this.gl.getExtension("EXT_shader_texture_lod");
+	this.glTextureLodExt           = this.gl.getExtension("GL_EXT_shader_texture_lod");
+	this.depthTextureExt           = this.gl.getExtension("EXT_sRGB"); // Or browser-appropriate prefix
+	this.depthTextureExt           = this.gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
+	this.fragDepthExt              = this.gl.getExtension("EXT_frag_depth"); // Or browser-appropriate prefix
+	this.floatTextureExt           = this.gl.getExtension("OES_texture_float"); // Or browser-appropriate prefix
+	this.halfFloatTextureExt       = this.gl.getExtension("OES_texture_half_float"); // Or browser-appropriate prefix
+	this.floatTextureLinearExt     = this.gl.getExtension("OES_texture_float_linear"); // Or browser-appropriate prefix
+	this.halfFloatTextureLinearExt = this.gl.getExtension("OES_texture_half_float_linear"); // Or browser-appropriate prefix
+	this.standardDerivativesExt    = this.gl.getExtension("OES_standard_derivatives"); // Or browser-appropriate prefix
+	*/
+
+	var extensions = ["EXT_shader_texture_lod", "GL_EXT_shader_texture_lod", "EXT_sRGB", "WEBKIT_WEBGL_depth_texture", "EXT_frag_depth", "OES_texture_float", "OES_texture_half_float", "OES_texture_float_linear", "OES_texture_half_float_linear", "OES_standard_derivatives"];
+	this.extensions = {};
+	for(var i=0; i<extensions.length; i++) {
+		this.extensions[extensions[i]] = this.gl.getExtension(extensions[i]);
+	}
 
 	this.enabledVertexAttribute = [];
 	this.enableAlphaBlending();
 	this._viewport = [0, 0, this.width, this.height];
+
+	this.showExtensions();
+};
+
+
+
+p.showExtensions = function() {
+	for(var ext in this.extensions) {
+		if(this.extensions[ext]) {
+			console.log(ext, ':', this.extensions[ext]);	
+		}
+		
+	}	
 };
 
 
@@ -17225,21 +17163,45 @@ p.init = function(mCanvas, mWidth, mHeight, parameters) {
 	this.gl.clearColor( 0, 0, 0, 1 );
 	this.gl.clearDepth( 1 );
 
-	this.matrix                 = glm.mat4.create();
+	this.matrix                    = glm.mat4.create();
 	glm.mat4.identity(this.matrix);
-	this.normalMatrix           = glm.mat3.create();
-	this.invertMVMatrix         = glm.mat3.create();
-	this.textureLodExt        	= this.gl.getExtension("EXT_shader_texture_lod");
-	this.glTextureLodExt        = this.gl.getExtension("GL_EXT_shader_texture_lod");
-	this.depthTextureExt        = this.gl.getExtension("EXT_sRGB"); // Or browser-appropriate prefix
-	this.depthTextureExt        = this.gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
-	this.floatTextureExt        = this.gl.getExtension("OES_texture_float"); // Or browser-appropriate prefix
-	this.floatTextureLinearExt  = this.gl.getExtension("OES_texture_float_linear"); // Or browser-appropriate prefix
-	this.standardDerivativesExt = this.gl.getExtension("OES_standard_derivatives"); // Or browser-appropriate prefix
+	this.normalMatrix              = glm.mat3.create();
+	this.invertMVMatrix            = glm.mat3.create();
+	/*
+	this.textureLodExt             = this.gl.getExtension("EXT_shader_texture_lod");
+	this.glTextureLodExt           = this.gl.getExtension("GL_EXT_shader_texture_lod");
+	this.depthTextureExt           = this.gl.getExtension("EXT_sRGB"); // Or browser-appropriate prefix
+	this.depthTextureExt           = this.gl.getExtension("WEBKIT_WEBGL_depth_texture"); // Or browser-appropriate prefix
+	this.fragDepthExt              = this.gl.getExtension("EXT_frag_depth"); // Or browser-appropriate prefix
+	this.floatTextureExt           = this.gl.getExtension("OES_texture_float"); // Or browser-appropriate prefix
+	this.halfFloatTextureExt       = this.gl.getExtension("OES_texture_half_float"); // Or browser-appropriate prefix
+	this.floatTextureLinearExt     = this.gl.getExtension("OES_texture_float_linear"); // Or browser-appropriate prefix
+	this.halfFloatTextureLinearExt = this.gl.getExtension("OES_texture_half_float_linear"); // Or browser-appropriate prefix
+	this.standardDerivativesExt    = this.gl.getExtension("OES_standard_derivatives"); // Or browser-appropriate prefix
+	*/
+
+	var extensions = ["EXT_shader_texture_lod", "GL_EXT_shader_texture_lod", "EXT_sRGB", "WEBKIT_WEBGL_depth_texture", "EXT_frag_depth", "OES_texture_float", "OES_texture_half_float", "OES_texture_float_linear", "OES_texture_half_float_linear", "OES_standard_derivatives"];
+	this.extensions = {};
+	for(var i=0; i<extensions.length; i++) {
+		this.extensions[extensions[i]] = this.gl.getExtension(extensions[i]);
+	}
 
 	this.enabledVertexAttribute = [];
 	this.enableAlphaBlending();
 	this._viewport = [0, 0, this.width, this.height];
+
+	this.showExtensions();
+};
+
+
+
+p.showExtensions = function() {
+	for(var ext in this.extensions) {
+		if(this.extensions[ext]) {
+			console.log(ext, ':', this.extensions[ext]);	
+		}
+		
+	}	
 };
 
 
@@ -19314,4 +19276,4 @@ module.exports = ViewDotPlanes;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[7]);
+},{}]},{},[6]);
