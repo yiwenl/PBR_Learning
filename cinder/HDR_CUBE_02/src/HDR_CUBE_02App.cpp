@@ -4,6 +4,7 @@
 #include "cinder/ImageIo.h"
 #include "cinder/CameraUi.h"
 #include "cinder/ImageFileTinyExr.h"
+#include "cinder/params/Params.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -31,6 +32,7 @@ private:
     CameraUi                mCamUI;
     
     float                   mExposure = 1.0f;
+    params::InterfaceGlRef          _params;
 };
 
 
@@ -49,7 +51,8 @@ void HDR_CUBE_02App::setup()
     mSkyboxBatch = gl::Batch::create(geom::Cube(), mShaderSkybox);
     mSkyboxBatch->getGlslProg()->uniform("uCubeMapTex", 0);
     
-    mBatch = gl::Batch::create( geom::Teapot().subdivisions( 7 ), mShaderEnvMap );
+//    mBatch = gl::Batch::create( geom::Teapot().subdivisions( 7 ), mShaderEnvMap );
+    mBatch = gl::Batch::create( geom::Sphere().subdivisions(30), mShaderEnvMap);
     mBatch->getGlslProg()->uniform( "uCubeMapTex", 0 );
 
     
@@ -62,6 +65,11 @@ void HDR_CUBE_02App::setup()
     ImageTargetFileTinyExr::registerSelf();
     
     loadHdr( getAssetPath( "doge2_radiance.hdr" ) );
+    
+    
+    _params         = params::InterfaceGl::create( "HDR CUBE MAP", vec2( 300, getWindowHeight()-200 ) );
+    _params->addParam("Exposure", &mExposure, "min=0.0 max=12.0 step=.1");
+//    _params->addPa
 }
 
 
@@ -112,6 +120,7 @@ void HDR_CUBE_02App::draw()
     
     mCubeMap->bind();
     mShaderSkybox->uniform( "uExposure", mExposure );
+    mShaderEnvMap->uniform( "uExposure", mExposure );
     
     gl::pushMatrices();
         gl::scale( vec3( 4 ) );
@@ -123,6 +132,8 @@ void HDR_CUBE_02App::draw()
         mSkyboxBatch->draw();
     gl::popMatrices();
      //*/
+    
+    _params->draw();
 }
 
-CINDER_APP( HDR_CUBE_02App, RendererGl )
+CINDER_APP( HDR_CUBE_02App, RendererGl( RendererGl::Options().msaa( 16 ) ) )
