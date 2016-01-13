@@ -78,6 +78,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				29B97317FDCFA39411CA2CEA /* Resources */,
 				80A644A4A2F647F8B4E3F158 /* ImageBasedLighting_04App.cpp */,
 			);
 			name = Source;
@@ -125,7 +126,6 @@
 				01B97315FEAEA392516A2CEA /* Blocks */,
 				29B97315FDCFA39411CA2CEA /* Headers */,
 				080E96DDFE201D6D7F000001 /* Source */,
-				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);

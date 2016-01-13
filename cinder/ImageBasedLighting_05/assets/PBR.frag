@@ -6,12 +6,16 @@ uniform samplerCube uIrradianceMap;
 uniform sampler2D 	uNormalMap;
 uniform sampler2D 	uRoughnessMap;
 uniform sampler2D 	uMetallicMap;
+uniform sampler2D 	uSpecularMap;
+uniform sampler2D 	uColorMap;
+uniform sampler2D 	uAOMap;
 
 uniform vec3		uBaseColor;
-uniform float		uRoughness;
-uniform float		uRoughness4;
-uniform float		uMetallic;
-uniform float		uSpecular;
+//uniform float		uRoughness;
+//uniform float		uRoughness4;
+//uniform float		uMetallic;
+//uniform float		uSpecular;
+uniform float       uNormalMapScale;
 
 uniform float		uExposure;
 uniform float		uGamma;
@@ -85,27 +89,20 @@ vec3 blendNormals( vec3 n1, vec3 n2 )
 
 void main() {
     const float range       = 0.75;
-    float vRoughnessOffset  = (abs(vOrgPosition.y) < range || abs(vOrgPosition.x) < range || abs(vOrgPosition.z) < range) ? 0.0 : 1.0;
-    vec3 baseColor      = vRoughnessOffset < 1.0 ? uBaseColor : vec3(1.0, 1.0, 0.000015);
     
-    float roughnessMask	= texture( uRoughnessMap, vUv ).r;
-    float metallicMask	= texture( uMetallicMap, vUv ).r;
-
-    float roughness     = uRoughness * vRoughnessOffset;
-    float roughness4    = uRoughness4 * vRoughnessOffset;
-    float metallic      = uMetallic * (1.0 - vRoughnessOffset);
-    float _specular     = uSpecular * (1.0 - vRoughnessOffset);
-    
-    roughnessMask       = mix(roughnessMask, 1.0, .005);
-    metallicMask        = mix(metallicMask, 1.0, .005);
-    
-    roughness           *= roughnessMask;
-    roughness4          *= roughnessMask;
-    metallic            *= metallicMask;
-    
+    vec3 baseColor      = texture( uColorMap, vUv).rgb;
+    vec3 ao             = texture( uAOMap, vUv).rgb;
+    float roughness     = texture( uRoughnessMap, vUv ).r;
+    float roughness4    = pow(roughness, 4.0);
+    float metallic      = texture( uMetallicMap, vUv ).r;
+    float _specular     = texture( uSpecularMap, vUv).r;
+   
 	
 	vec3 N 				= normalize( vWsNormal );
-    N 					= blendNormals( N, texture( uNormalMap, vUv ).xyz );
+    vec3 newN 		    = blendNormals( N, texture( uNormalMap, vUv ).xyz );
+//    N                   = mix(N, newN, uNormalMapScale);
+//    vec3 N              = vWsNormal + texture( uNormalMap, vUv ).xyz * uNormalMapScale * .5;
+//    N                   = normalize(N);
     
 	vec3 V 				= normalize( vEyePosition );
     
@@ -141,6 +138,7 @@ void main() {
 	
 	// gamma correction
 	color				= pow( color, vec3( 1.0f / uGamma ) );
+    color               *= ao;
 	
 	// output the fragment color
     oColor				= vec4( color, 1.0 );

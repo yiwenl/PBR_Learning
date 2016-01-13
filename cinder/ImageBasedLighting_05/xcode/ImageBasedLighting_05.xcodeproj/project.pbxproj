@@ -18,9 +18,8 @@
 		00B9955B1B128DF400A5C623 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		39F92944DDB142E3B8ACE56F /* ImageBasedLighting_05_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 736087B8897C4E1E80349339 /* ImageBasedLighting_05_Prefix.pch */; };
+		A2F49CC11C46AFB20052A56F /* assets in Resources */ = {isa = PBXBuildFile; fileRef = A2F49CC01C46AFB20052A56F /* assets */; };
 		B121F60F44924D6EA0579CE6 /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = BAF6F38FCB3A41149C047815 /* CinderApp.icns */; };
-		5F9B37794D9242B59239526F /* Resources.h in Headers */ = {isa = PBXBuildFile; fileRef = AD9FBF69919A4AF2A72ED7A6 /* Resources.h */; };
 		BAC37E81E420456EBDCD607F /* ImageBasedLighting_05App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BCC8538477884A1D90AC5FEF /* ImageBasedLighting_05App.cpp */; };
 /* End PBXBuildFile section */
 
@@ -38,12 +37,13 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
+		736087B8897C4E1E80349339 /* ImageBasedLighting_05_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; path = ImageBasedLighting_05_Prefix.pch; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ImageBasedLighting_05.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageBasedLighting_05.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		BCC8538477884A1D90AC5FEF /* ImageBasedLighting_05App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; path = ../src/ImageBasedLighting_05App.cpp; sourceTree = "<group>"; name = ImageBasedLighting_05App.cpp; };
-		AD9FBF69919A4AF2A72ED7A6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ../include/Resources.h; sourceTree = "<group>"; name = Resources.h; };
-		BAF6F38FCB3A41149C047815 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; name = CinderApp.icns; };
-		C56A4D79123640B18CE5DD2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; name = Info.plist; };
-		736087B8897C4E1E80349339 /* ImageBasedLighting_05_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; path = ImageBasedLighting_05_Prefix.pch; sourceTree = "<group>"; name = ImageBasedLighting_05_Prefix.pch; };
+		A2F49CC01C46AFB20052A56F /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../assets; sourceTree = "<group>"; };
+		AD9FBF69919A4AF2A72ED7A6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../include/Resources.h; sourceTree = "<group>"; };
+		BAF6F38FCB3A41149C047815 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; };
+		BCC8538477884A1D90AC5FEF /* ImageBasedLighting_05App.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = ImageBasedLighting_05App.cpp; path = ../src/ImageBasedLighting_05App.cpp; sourceTree = "<group>"; };
+		C56A4D79123640B18CE5DD2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +68,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		01B97315FEAEA392516A2CEA /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Blocks;
+			sourceTree = "<group>";
+		};
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +121,7 @@
 		29B97314FDCFA39411CA2CEA /* ImageBasedLighting_05 */ = {
 			isa = PBXGroup;
 			children = (
+				A2F49CC01C46AFB20052A56F /* assets */,
 				01B97315FEAEA392516A2CEA /* Blocks */,
 				29B97315FDCFA39411CA2CEA /* Headers */,
 				080E96DDFE201D6D7F000001 /* Source */,
@@ -122,13 +130,6 @@
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = ImageBasedLighting_05;
-			sourceTree = "<group>";
-		};
-		01B97315FEAEA392516A2CEA /* Blocks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Blocks;
 			sourceTree = "<group>";
 		};
 		29B97315FDCFA39411CA2CEA /* Headers */ = {
@@ -184,6 +185,8 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ImageBasedLighting_05" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -209,6 +212,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B121F60F44924D6EA0579CE6 /* CinderApp.icns in Resources */,
+				A2F49CC11C46AFB20052A56F /* assets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,17 +234,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ImageBasedLighting_05_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = ImageBasedLighting_05_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -262,12 +266,12 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ImageBasedLighting_05_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"NDEBUG=1",
 					"$(inherited)",
 				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = ImageBasedLighting_05_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -284,7 +288,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CINDER_PATH = "../../../../../cinder_0.9.0_mac";
+				CINDER_PATH = ../../../../../cinder_0.9.0_mac;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_TESTABILITY = YES;
@@ -302,7 +306,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CINDER_PATH = "../../../../../cinder_0.9.0_mac";
+				CINDER_PATH = ../../../../../cinder_0.9.0_mac;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
